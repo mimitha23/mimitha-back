@@ -133,4 +133,23 @@ export const changePassword = Async(async function (req, res, next) {
   res.status(201).json({ passwordIsChanged: true, accessToken });
 });
 
-export const refresh = Async(async function (req, res, next) {});
+export const refresh = Async(async function (req, res, next) {
+  const { authorization } = req.cookies;
+
+  if (!authorization) return next(new AppError(401, "you are not authorized"));
+
+  const verifiedToken = await JWT.verifyToken(authorization, true);
+
+  if (!verifiedToken) return next(new AppError(404, "user does not exists"));
+
+  const user = await User.findById(verifiedToken._id);
+
+  if (!user) return next(new AppError(404, "user does not exists"));
+
+  const { accessToken } = JWT.asignToken({
+    res,
+    payload: user,
+  });
+
+  res.status(201).json({ accessToken });
+});

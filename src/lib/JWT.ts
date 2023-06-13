@@ -2,6 +2,7 @@ import { Response } from "express";
 import jwt from "jsonwebtoken";
 import { NODE_MODE } from "../config/env";
 import { ReqUserT } from "../types";
+import { promisify } from "util";
 
 class JWT {
   private accessSecret;
@@ -44,7 +45,26 @@ class JWT {
     return { accessToken };
   }
 
-  verifyToken() {}
+  async verifyToken(token: string, refresh?: boolean): Promise<jwt.JwtPayload> {
+    try {
+      type VerifyFunctionT = (
+        token: string,
+        secretOrPublicKey: jwt.Secret | jwt.GetPublicKeyOrSecret,
+        options?: jwt.VerifyOptions
+      ) => Promise<jwt.JwtPayload>;
+
+      const verificator: VerifyFunctionT = promisify(jwt.verify);
+
+      const verifiedToken = await verificator(
+        token,
+        refresh ? this.refreshSecret : this.accessSecret
+      );
+
+      return verifiedToken;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default new JWT();
