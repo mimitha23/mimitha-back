@@ -24,7 +24,7 @@ export const checkAuth = Async(async function (req, _, next) {
   if (!user) return next(new AppError(403, "you are not authorised"));
 
   req.user = <ReqUserT>{
-    _id: user._id,
+    _id: user._id.toString(),
     email: user.email,
     username: user.username,
   };

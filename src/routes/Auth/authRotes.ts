@@ -7,6 +7,8 @@ import {
   forgotPassword,
   updatePassword,
   changePassword,
+  demandSetPassword,
+  setPassword,
   refresh,
 } from "../../controllers/Auth/authController";
 import { checkAuth } from "../../middlewares/checkAuth";
@@ -20,6 +22,8 @@ router.route("/logout").post(logout);
 router.route("/forgot-password").post(forgotPassword);
 router.route("/forgot-password/:token").post(updatePassword);
 router.route("/change-password").post(checkAuth, changePassword);
-router.route("/refresh").post(refresh);
+router.route("/demand-password/:userId").post(checkAuth, demandSetPassword);
+router.route("/demand-password/:userId/:token").post(checkAuth, setPassword);
+router.route("/refresh").post(checkAuth, refresh);
 
 export default router;

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
+import path from "path";
 
 import { AppError } from "./lib";
 import { APP_ORIGINS, NODE_MODE } from "./config/env";
@@ -13,6 +14,9 @@ const App = express();
 
 App.use(express.json());
 App.use(express.urlencoded({ extended: true }));
+
+App.set("view engine", "pug");
+App.set("views", path.join(__dirname, "/views"));
 
 App.use(cookieParser());
 
@@ -48,6 +52,13 @@ App.use(
 NODE_MODE === "DEV" && App.use(morgan("dev"));
 
 App.use("/api/v1/auth", authRoutes);
+
+App.get("/view", (req, res) => {
+  res.status(200).render("emails/passwordReset", {
+    userName: "Russ",
+    url: "/change-password/reset-token",
+  });
+});
 
 App.all("*", (req, _, next) => {
   next(new AppError(404, `can't find ${req.originalUrl} on this server`));

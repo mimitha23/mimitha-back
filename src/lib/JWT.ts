@@ -21,7 +21,7 @@ class JWT {
     accessToken: string;
   } {
     const accessTokenPayload: ReqUserT = {
-      _id: payload._id,
+      _id: payload._id.toString(),
       email: payload.email,
       username: payload.username,
     };

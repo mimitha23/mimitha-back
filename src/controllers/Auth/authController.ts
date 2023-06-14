@@ -1,6 +1,7 @@
 import User from "../../models/User";
-import { Async, JWT, AppError } from "../../lib";
+import { Async, JWT, AppError, Email } from "../../lib";
 import UserUtils from "../../utils/UserUtils/UserUtils";
+import { ReqUserT } from "../../types";
 
 export const register = Async(async function (req, res, next) {
   const { fullname, username, email, password } = req.body;
@@ -25,7 +26,9 @@ export const login = Async(async function (req, res, next) {
   if (!email || !password)
     return next(new AppError(403, "please enter your email and password"));
 
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email, authByGoogle: false }).select(
+    "+password"
+  );
 
   if (!user) return next(new AppError(403, "incorect email or password"));
 
@@ -49,12 +52,18 @@ export const googleLogin = Async(async function (req, res, next) {
 
   let user = await User.findOne({ email });
 
-  if (!user)
+  if (!user) {
     user = await new User({
       email,
       fullname: username,
+      username,
       authByGoogle: true,
     }).save({ validateBeforeSave: false });
+
+    await new Email({ adressat: user.email }).sendWelcome({
+      userName: user.fullname,
+    });
+  }
 
   const userData = UserUtils.generateUserToClientData(user);
 
@@ -73,18 +82,22 @@ export const forgotPassword = Async(async function (req, res, next) {
 
   if (!email) return next(new AppError(403, "please enter your email"));
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, authByGoogle: false });
 
   if (!user)
     return next(new AppError(403, "user with this email does not exists"));
 
   const passwordResetToken = await user.createPasswordResetToken();
 
-  // send email
+  await new Email({ adressat: user.email }).sendPasswordReset({
+    userName: user.fullname,
+    resetToken: passwordResetToken,
+  });
 
   res.status(201).json({ emailIsSent: true, passwordResetToken });
 });
 
+// route after forgotPassword
 export const updatePassword = Async(async function (req, res, next) {
   const { token } = req.params;
   const { password } = req.body;
@@ -112,7 +125,7 @@ export const updatePassword = Async(async function (req, res, next) {
 });
 
 export const changePassword = Async(async function (req, res, next) {
-  const currUser = req.user;
+  const currUser: ReqUserT = req.user;
   const { password, newPassword } = req.body;
 
   if (!password || !newPassword)
@@ -131,6 +144,79 @@ export const changePassword = Async(async function (req, res, next) {
   const { accessToken } = JWT.asignToken({ payload: user, res });
 
   res.status(201).json({ passwordIsChanged: true, accessToken });
+});
+
+export const demandSetPassword = Async(async function (req, res, next) {
+  const currUser: ReqUserT = req.user;
+  const { email } = req.body;
+  const { userId } = req.params;
+
+  if (!email || !userId)
+    return next(new AppError(403, "please enter valid credentials."));
+  else if (currUser._id !== userId || currUser.email !== email)
+    return next(
+      new AppError(403, "you are not authorised for this operation.")
+    );
+
+  const user = await User.findOne({
+    email,
+    _id: userId,
+    authByGoogle: true,
+  });
+
+  if (!user)
+    return next(
+      new AppError(
+        403,
+        "invalid credentials or you are not registered with google."
+      )
+    );
+
+  const passwordResetToken = await user.createPasswordResetToken();
+
+  await new Email({ adressat: user.email }).sendPasswordReset({
+    userName: user.fullname,
+    resetToken: passwordResetToken,
+  });
+
+  res.status(201).json({ emailIsSent: true, passwordResetToken });
+});
+
+// route after demandSetPassword
+export const setPassword = Async(async function (req, res, next) {
+  const currUser: ReqUserT = req.user;
+  const { userId, token } = req.params;
+  const { password } = req.body;
+
+  if (!userId || !token)
+    return next(new AppError(403, "please enter valid credentials."));
+  else if (currUser._id !== userId)
+    return next(
+      new AppError(403, "you are not authorised for this operation.")
+    );
+
+  const { hashedToken } = UserUtils.generatePasswordResetToken(
+    token.toString() || ""
+  );
+
+  const user = await User.findOne({
+    _id: userId,
+    authByGoogle: true,
+    passwordResetToken: hashedToken,
+    passwordResetAt: { $gte: Date.now() },
+  });
+
+  if (!user) return next(new AppError(403, "please enter valid credentials."));
+
+  user.password = password;
+  user.passwordResetToken = undefined;
+  user.passwordResetAt = undefined;
+  user.authByGoogle = false;
+  await user.save();
+
+  const { accessToken } = JWT.asignToken({ payload: user, res });
+
+  res.status(201).json({ passwordIsSet: true, accessToken });
 });
 
 export const refresh = Async(async function (req, res, next) {

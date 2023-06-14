@@ -40,6 +40,25 @@ const DASHBOARD_ORIGIN = generateOrigin("DASHBOARD");
 const APP_ORIGINS = generateAppOrigins();
 
 // EMAIL
+const DEV_EMAIL_HOST = process.env.DEV_EMAIL_HOST || "";
+const DEV_EMAIL_PORT = process.env.DEV_EMAIL_PORT || "";
+const DEV_EMAIL_SERVICE = process.env.DEV_EMAIL_SERVICE || "";
+const DEV_EMAIL_USER = process.env.DEV_EMAIL_USER || "";
+const DEV_EMAIL_PASSWORD = process.env.DEV_EMAIL_PASSWORD || "";
+
+const PROD_EMAIL_HOST = process.env.PROD_EMAIL_HOST || "";
+const PROD_EMAIL_PORT = process.env.PROD_EMAIL_PORT || "";
+const PROD_EMAIL_SERVICE = process.env.PROD_EMAIL_SERVICE || "";
+const PROD_EMAIL_USER = process.env.PROD_EMAIL_USER || "";
+const PROD_EMAIL_PASSWORD = process.env.PROD_EMAIL_PASSWORD || "";
+
+const EMAIL_HOST = NODE_MODE === "DEV" ? DEV_EMAIL_HOST : PROD_EMAIL_HOST;
+const EMAIL_PORT = NODE_MODE === "DEV" ? DEV_EMAIL_PORT : PROD_EMAIL_PORT;
+const EMAIL_SERVICE =
+  NODE_MODE === "DEV" ? DEV_EMAIL_SERVICE : PROD_EMAIL_SERVICE;
+const EMAIL_USER = NODE_MODE === "DEV" ? DEV_EMAIL_USER : PROD_EMAIL_USER;
+const EMAIL_PASSWORD =
+  NODE_MODE === "DEV" ? DEV_EMAIL_PASSWORD : PROD_EMAIL_PASSWORD;
 
 export {
   NODE_MODE,
@@ -49,6 +68,11 @@ export {
   APP_ORIGIN,
   DASHBOARD_ORIGIN,
   APP_ORIGINS,
+  EMAIL_HOST,
+  EMAIL_PORT,
+  EMAIL_SERVICE,
+  EMAIL_USER,
+  EMAIL_PASSWORD,
 };
 
 // HELPERS
