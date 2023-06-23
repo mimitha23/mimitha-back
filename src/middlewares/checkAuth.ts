@@ -2,7 +2,7 @@ import { Async, AppError, JWT } from "../lib";
 import User from "../models/User";
 import { ReqUserT } from "../types";
 
-export const checkAuth = Async(async function (req, _, next) {
+const checkAuth = Async(async function (req, _, next) {
   const authorizationHeader = req.headers.authorization;
 
   if (
@@ -31,3 +31,5 @@ export const checkAuth = Async(async function (req, _, next) {
 
   next();
 });
+
+export default checkAuth;

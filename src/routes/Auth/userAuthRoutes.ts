@@ -10,8 +10,8 @@ import {
   demandSetPassword,
   setPassword,
   refresh,
-} from "../../controllers/Auth/authController";
-import { checkAuth } from "../../middlewares/checkAuth";
+} from "../../controllers/Auth/userAuthController";
+import { checkAuth } from "../../middlewares";
 
 const router = Router();
 

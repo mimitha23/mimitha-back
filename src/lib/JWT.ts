@@ -24,6 +24,7 @@ class JWT {
       _id: payload._id.toString(),
       email: payload.email,
       username: payload.username,
+      role: payload.role,
     };
 
     const accessToken = jwt.sign(accessTokenPayload, this.accessSecret, {

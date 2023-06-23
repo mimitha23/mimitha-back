@@ -1,24 +1,12 @@
 import bcrypt from "bcrypt";
 import { Schema, model } from "mongoose";
 import UserUtils from "../utils/UserUtils/UserUtils";
-import { IUser, IUserMethods, UserModelT } from "./interface/user.types";
+import { IStaff, IStaffMethods, StaffModelT } from "./interface/staff.types";
 
-const UserSchema = new Schema<IUser, UserModelT, IUserMethods>(
+const StaffSchema = new Schema<IStaff, StaffModelT, IStaffMethods>(
   {
-    role: {
-      type: String,
-      enum: ["USER"],
-      default: "USER",
-    },
-
     fullname: {
       type: String,
-      required: true,
-    },
-
-    username: {
-      type: String,
-      unique: true,
       required: true,
     },
 
@@ -28,9 +16,10 @@ const UserSchema = new Schema<IUser, UserModelT, IUserMethods>(
       required: true,
     },
 
-    authByGoogle: {
-      type: Boolean,
-      default: false,
+    role: {
+      type: String,
+      enum: ["ADMIN", "MODERATOR"],
+      required: true,
     },
 
     password: {
@@ -52,20 +41,20 @@ const UserSchema = new Schema<IUser, UserModelT, IUserMethods>(
   { timestamps: true }
 );
 
-UserSchema.pre("save", async function (next) {
+StaffSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
-UserSchema.methods.checkPassword = async function (
+StaffSchema.methods.checkPassword = async function (
   candidatePassword,
   password
 ) {
   return await bcrypt.compare(candidatePassword, password);
 };
 
-UserSchema.methods.createPasswordResetToken =
+StaffSchema.methods.createPasswordResetToken =
   async function (): Promise<string> {
     const { hashedToken, resetToken } = UserUtils.generatePasswordResetToken();
 
@@ -77,6 +66,6 @@ UserSchema.methods.createPasswordResetToken =
     return resetToken || "";
   };
 
-const User = model<IUser, UserModelT>("User", UserSchema);
+const User = model<IStaff, StaffModelT>("Staff", StaffSchema);
 
 export default User;

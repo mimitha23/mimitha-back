@@ -1,7 +1,7 @@
-import User from "../../models/User";
 import { Async, JWT, AppError, Email } from "../../lib";
 import UserUtils from "../../utils/UserUtils/UserUtils";
 import { ReqUserT } from "../../types";
+import { User } from "../../models";
 
 export const register = Async(async function (req, res, next) {
   const { fullname, username, email, password } = req.body;
@@ -77,6 +77,7 @@ export const logout = Async(async function (req, res, next) {
   res.end();
 });
 
+// 1.0
 export const forgotPassword = Async(async function (req, res, next) {
   const { email } = req.body;
 
@@ -97,7 +98,7 @@ export const forgotPassword = Async(async function (req, res, next) {
   res.status(201).json({ emailIsSent: true, passwordResetToken });
 });
 
-// route after forgotPassword
+// 1.1 route after forgotPassword
 export const updatePassword = Async(async function (req, res, next) {
   const { token } = req.params;
   const { password } = req.body;
@@ -124,6 +125,7 @@ export const updatePassword = Async(async function (req, res, next) {
   res.status(201).json({ passwordIsUpdated: true });
 });
 
+// 2.0
 export const changePassword = Async(async function (req, res, next) {
   const currUser: ReqUserT = req.user;
   const { password, newPassword } = req.body;
@@ -146,6 +148,7 @@ export const changePassword = Async(async function (req, res, next) {
   res.status(201).json({ passwordIsChanged: true, accessToken });
 });
 
+// 3.0
 export const demandSetPassword = Async(async function (req, res, next) {
   const currUser: ReqUserT = req.user;
   const { email } = req.body;
@@ -182,7 +185,7 @@ export const demandSetPassword = Async(async function (req, res, next) {
   res.status(201).json({ emailIsSent: true, passwordResetToken });
 });
 
-// route after demandSetPassword
+// 3.1 route after demandSetPassword
 export const setPassword = Async(async function (req, res, next) {
   const currUser: ReqUserT = req.user;
   const { userId, token } = req.params;

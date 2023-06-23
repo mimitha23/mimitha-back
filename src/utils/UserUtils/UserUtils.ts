@@ -12,6 +12,7 @@ class UserUtils {
       email: "",
       fullname: "",
       username: "",
+      role: "",
     };
 
     USER_WHITE_LIST.forEach((key) => {

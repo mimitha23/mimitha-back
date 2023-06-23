@@ -11,6 +11,7 @@ export interface IUser {
   passwordResetAt?: Date;
   createdAt: string;
   updatedAt: string;
+  role: "USER";
 }
 
 export interface IUserMethods {
@@ -29,4 +30,5 @@ export interface USER_TO_CLIENT_T {
   fullname: IUser["fullname"];
   username: IUser["username"];
   email: IUser["email"];
+  role: string;
 }

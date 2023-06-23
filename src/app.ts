@@ -8,7 +8,15 @@ import { AppError } from "./lib";
 import { APP_ORIGINS, NODE_MODE } from "./config/env";
 import errorController from "./controllers/errorController";
 
-import authRoutes from "./routes/Auth/authRotes";
+// Auth
+import userAuthRoutes from "./routes/Auth/userAuthRoutes";
+import staffAuthRoutes from "./routes/Auth/staffAuthRoutes";
+
+// Moderate
+import collorRoutes from "./routes/Moderate/collorRoutes";
+import productStylesRoutes from "./routes/Moderate/productStylesRoutes";
+import productTypeRoutes from "./routes/Moderate/productTypeRoutes";
+import variantRoutes from "./routes/Moderate/variantRoutes";
 
 const App = express();
 
@@ -51,7 +59,14 @@ App.use(
 
 NODE_MODE === "DEV" && App.use(morgan("dev"));
 
-App.use("/api/v1/auth", authRoutes);
+// Auth
+App.use("/api/v1/auth", userAuthRoutes);
+App.use("/api/v1/auth/staff", staffAuthRoutes);
+// Moderate
+App.use("/api/v1/moderate/color", collorRoutes);
+App.use("/api/v1/moderate/variant", variantRoutes);
+App.use("/api/v1/moderate/product-type", productTypeRoutes);
+App.use("/api/v1/moderate/product-style", productStylesRoutes);
 
 App.get("/view", (req, res) => {
   res.status(200).render("emails/passwordReset", {
