@@ -1,7 +1,17 @@
 import { Router } from "express";
+import { productStyleController } from "../../controllers/Moderate";
 import { checkAuth, restrictByRoles } from "../../middlewares";
-import { createProductStyle } from "../../controllers/Moderate/productStyleController";
 
 const router = Router();
+
+router
+  .route("/")
+  .get(productStyleController.getAllProductStyle)
+  .post(productStyleController.createProductStyle);
+
+router
+  .route("/:id")
+  .put(productStyleController.updateProductStyle)
+  .delete(productStyleController.deleteProductStyle);
 
 export default router;
