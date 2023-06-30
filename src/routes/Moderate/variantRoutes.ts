@@ -7,7 +7,7 @@ const router = Router();
 router
   .route("/")
   .get(variantController.getAllVariant)
-  .post(variantController.createVariant);
+  .post(variantController.uploadMedia("icon"), variantController.createVariant);
 
 router
   .route("/:id")

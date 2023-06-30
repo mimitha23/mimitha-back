@@ -1,11 +1,25 @@
-import { Async, AppError } from "../../lib";
+import { Async, AppError, FileUplaod } from "../../lib";
 import { Variant } from "../../models";
+import { uploadFileOnFirebase } from "../../services/firebase";
 import { ReqUserT } from "../../types";
+
+const fileUpload = new FileUplaod({
+  storage: "memoryStorage",
+  upload: "single",
+});
+
+export const uploadMedia = (filename: string) =>
+  fileUpload.uploadMedia({ filename });
 
 export const createVariant = Async(async function (req, res, next) {
   const body = req.body;
-
-  await Variant.create(body);
+  const downloadUrl = await uploadFileOnFirebase({
+    file: Buffer.from(req.file.buffer),
+    filename: req.file.originalname,
+    folder: "icons",
+  });
+  console.log({ downloadUrl });
+  // await Variant.create(body);
 
   res.status(201).json("variant is created");
 });
