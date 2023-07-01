@@ -7,6 +7,7 @@ export interface VariantT {
     en: string;
   };
   description: string;
+  icon: string;
 }
 
 export interface VariantMethodsT {}

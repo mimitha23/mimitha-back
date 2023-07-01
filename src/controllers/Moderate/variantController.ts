@@ -13,13 +13,15 @@ export const uploadMedia = (filename: string) =>
 
 export const createVariant = Async(async function (req, res, next) {
   const body = req.body;
+
   const downloadUrl = await uploadFileOnFirebase({
     file: Buffer.from(req.file.buffer),
     filename: req.file.originalname,
+    contentType: "image/svg+xml",
     folder: "icons",
   });
-  console.log({ downloadUrl });
-  // await Variant.create(body);
+
+  await Variant.create({ ...body, icon: downloadUrl });
 
   res.status(201).json("variant is created");
 });
@@ -55,4 +57,10 @@ export const deleteVariant = Async(async function (req, res, next) {
   if (!doc) return next(new AppError(400, "there ane no such color"));
 
   res.status(204).json("variant is deleted");
+});
+
+export const getExistingVariantTypes = Async(async function (req, res, next) {
+  const variants = await Variant.find().distinct("type");
+
+  res.status(200).json(variants);
 });

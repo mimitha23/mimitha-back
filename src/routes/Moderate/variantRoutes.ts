@@ -14,4 +14,6 @@ router
   .put(variantController.updateVariant)
   .delete(variantController.deleteVariant);
 
+router.route("/types").get(variantController.getExistingVariantTypes);
+
 export default router;

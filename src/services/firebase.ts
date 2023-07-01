@@ -7,14 +7,25 @@ import {
 } from "firebase/storage";
 import { initializeApp } from "firebase/app";
 
+import {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+  FIREBASE_MEASUREMENT_ID,
+} from "../config/env";
+import { firebaseFolders } from "../config/config";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyByq3B7pRh7oVGwjoAODNCx8lKl3qytDYk",
-  authDomain: "mimitha-e1a81.firebaseapp.com",
-  projectId: "mimitha-e1a81",
-  storageBucket: "mimitha-e1a81.appspot.com",
-  messagingSenderId: "847447214366",
-  appId: "1:847447214366:web:83956177748d36d7f3a10f",
-  measurementId: "G-0P4RSPVHNQ",
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
+  appId: FIREBASE_APP_ID,
+  measurementId: FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -26,19 +37,17 @@ export async function uploadFileOnFirebase({
   file,
   filename,
   folder,
+  contentType,
 }: UploadFileOnFirebaseT): Promise<string> {
-  const configuredFileName = `${new Date().getTime()}-${
-    filename.split(" ").join("-") || "unknown"
-  }`;
+  const configuredFileName = `${new Date().getTime()}-${Math.floor(
+    Math.random() * 5000
+  )}-${filename.split(" ").join("-") || "unknown"}`;
 
-  const folders = {
-    icons: "/icons",
-    products: "/products",
-  };
+  const storageRef = getStorageRef(
+    `${firebaseFolders[folder]}/${configuredFileName}`
+  );
 
-  const storageRef = getStorageRef(`${folders[folder]}/configuredFileName`);
-  const uploadedFileRef = await uploadBytes(storageRef, file);
-
+  const uploadedFileRef = await uploadBytes(storageRef, file, { contentType });
   const downloadUrl = await getDownloadURL(uploadedFileRef.ref);
 
   return downloadUrl;
@@ -56,5 +65,6 @@ export function deleteFile(fileName: string) {
 interface UploadFileOnFirebaseT {
   file: Buffer;
   filename: string;
-  folder: "icons" | "products";
+  folder: keyof typeof firebaseFolders;
+  contentType: "image/svg+xml" | "image/webp";
 }
