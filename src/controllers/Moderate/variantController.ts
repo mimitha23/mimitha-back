@@ -1,6 +1,5 @@
 import { Async, AppError, FileUplaod } from "../../lib";
 import { Variant } from "../../models";
-import { uploadFileOnFirebase } from "../../services/firebase";
 import { ReqUserT } from "../../types";
 
 const fileUpload = new FileUplaod({
@@ -14,12 +13,17 @@ export const uploadMedia = (filename: string) =>
 export const createVariant = Async(async function (req, res, next) {
   const body = req.body;
 
-  const downloadUrl = await uploadFileOnFirebase({
-    file: Buffer.from(req.file.buffer),
-    filename: req.file.originalname,
-    contentType: "image/svg+xml",
-    folder: "icons",
-  });
+  let downloadUrl;
+
+  try {
+    downloadUrl = await fileUpload.uploadFileOnFirebase({
+      file: req.file,
+      contentType: "image/svg+xml",
+      folder: "icons",
+    });
+  } catch (error) {
+    return next(new AppError(400, "occured error durin file upload"));
+  }
 
   await Variant.create({ ...body, icon: downloadUrl });
 
@@ -36,10 +40,25 @@ export const updateVariant = Async(async function (req, res, next) {
   const { id } = req.params;
   const body = req.body;
 
+  let downloadUrl;
+
+  if (req.file) {
+    try {
+      downloadUrl = await fileUpload.updateFileOnFirebase({
+        file: req.file,
+        contentType: "image/svg+xml",
+        folder: "icons",
+        downloadUrl: body.icon,
+      });
+    } catch (error) {
+      return next(new AppError(400, "occured error durin file upload"));
+    }
+  }
+
   const doc = await Variant.findByIdAndUpdate(
     id,
     {
-      $set: { ...body },
+      $set: { ...body, icon: downloadUrl },
     },
     { new: true }
   );

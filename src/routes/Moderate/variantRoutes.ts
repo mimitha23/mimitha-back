@@ -11,7 +11,10 @@ router
 
 router
   .route("/:id")
-  .put(variantController.updateVariant)
+  .put(
+    variantController.uploadMedia("newIcon"),
+    variantController.updateVariant
+  )
   .delete(variantController.deleteVariant);
 
 router.route("/types").get(variantController.getExistingVariantTypes);
