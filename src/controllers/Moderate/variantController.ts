@@ -22,7 +22,7 @@ export const createVariant = Async(async function (req, res, next) {
       folder: "icons",
     });
   } catch (error) {
-    return next(new AppError(400, "occured error durin file upload"));
+    return next(new AppError(400, "occured error during file upload"));
   }
 
   await Variant.create({ ...body, icon: downloadUrl });
@@ -51,7 +51,7 @@ export const updateVariant = Async(async function (req, res, next) {
         downloadUrl: body.icon,
       });
     } catch (error) {
-      return next(new AppError(400, "occured error durin file upload"));
+      return next(new AppError(400, "occured error during file upload"));
     }
   }
 
@@ -71,9 +71,17 @@ export const updateVariant = Async(async function (req, res, next) {
 export const deleteVariant = Async(async function (req, res, next) {
   const { id } = req.params;
 
-  const doc = await Variant.findByIdAndDelete(id);
+  const doc = await Variant.findById(id);
 
-  if (!doc) return next(new AppError(400, "there ane no such color"));
+  if (!doc) return next(new AppError(400, "there ane no such variant"));
+
+  try {
+    await fileUpload.deleteFileOnFirebase(doc.icon);
+  } catch (error) {
+    return next(new AppError(400, "occured error during delete file"));
+  }
+
+  await Variant.findByIdAndDelete(id);
 
   res.status(204).json("variant is deleted");
 });
