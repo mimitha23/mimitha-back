@@ -17,6 +17,7 @@ import collorRoutes from "./routes/Moderate/collorRoutes";
 import productStylesRoutes from "./routes/Moderate/productStylesRoutes";
 import productTypeRoutes from "./routes/Moderate/productTypeRoutes";
 import variantRoutes from "./routes/Moderate/variantRoutes";
+import registerProductRoutes from "./routes/Moderate/registerProductRoutes";
 
 const App = express();
 
@@ -67,6 +68,7 @@ App.use("/api/v1/moderate/color", collorRoutes);
 App.use("/api/v1/moderate/variant", variantRoutes);
 App.use("/api/v1/moderate/product-type", productTypeRoutes);
 App.use("/api/v1/moderate/product-style", productStylesRoutes);
+App.use("/api/v1/moderate/register-product/", registerProductRoutes);
 
 App.get("/view", (req, res) => {
   res.status(200).render("emails/passwordReset", {

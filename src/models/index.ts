@@ -4,3 +4,6 @@ export { default as ProductType } from "./ProductType";
 export { default as Staff } from "./Staff";
 export { default as User } from "./User";
 export { default as Variant } from "./Variant";
+export { default as RegisteredProduct } from "./RegisteredProduct";
+export { default as Seasons } from "./Seasons";
+export { default as Gender } from "./Gender";

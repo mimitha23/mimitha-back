@@ -6,17 +6,21 @@ const ColorSchema = new Schema<ColorT, ColorModelT, ColorMethodsT>({
     ka: {
       type: String,
       required: true,
+      unique: true,
     },
     en: {
       type: String,
       required: true,
+      unique: true,
     },
   },
   hex: {
     type: String,
     required: true,
+    unique: true,
   },
 });
 
 const Color = model<ColorT, ColorModelT>("Color", ColorSchema);
+
 export default Color;

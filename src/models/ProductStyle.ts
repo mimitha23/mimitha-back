@@ -10,19 +10,20 @@ const ProductStyleSchema = new Schema<
   ProductStyleModelT,
   ProductStyleMethodsT
 >({
-  label: {
-    ka: {
-      type: String,
-      required: true,
-    },
-    en: {
-      type: String,
-      required: true,
-    },
+  ka: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  en: {
+    type: String,
+    required: true,
+    unique: true,
   },
   query: {
     type: String,
     required: true,
+    unique: true,
   },
 });
 

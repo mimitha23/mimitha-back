@@ -14,10 +14,12 @@ const VariantSchema = new Schema<VariantT, VariantModelT, VariantMethodsT>({
     ka: {
       type: String,
       required: true,
+      unique: true,
     },
     en: {
       type: String,
       required: true,
+      unique: true,
     },
   },
   description: {

@@ -1,10 +1,8 @@
 import { Model } from "mongoose";
 
 export interface ProductTypeT {
-  label: {
-    ka: string;
-    en: string;
-  };
+  ka: string;
+  en: string;
   query: string;
 }
 
