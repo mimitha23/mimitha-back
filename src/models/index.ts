@@ -1,9 +1,10 @@
-export { default as Color } from "./Color";
-export { default as ProductStyle } from "./ProductStyle";
-export { default as ProductType } from "./ProductType";
+export { default as Color } from "./moderate/Color";
+export { default as ProductStyle } from "./moderate/ProductStyle";
+export { default as ProductType } from "./moderate/ProductType";
+export { default as Variant } from "./moderate/Variant";
+export { default as RegisteredProduct } from "./moderate/RegisteredProduct";
+export { default as Seasons } from "./moderate/Seasons";
+export { default as Gender } from "./moderate/Gender";
+export { default as Texture } from "./moderate/Texture";
 export { default as Staff } from "./Staff";
 export { default as User } from "./User";
-export { default as Variant } from "./Variant";
-export { default as RegisteredProduct } from "./RegisteredProduct";
-export { default as Seasons } from "./Seasons";
-export { default as Gender } from "./Gender";

@@ -1,5 +1,9 @@
 import { Schema, model } from "mongoose";
-import { ColorT, ColorMethodsT, ColorModelT } from "./interface/color.types";
+import {
+  ColorT,
+  ColorMethodsT,
+  ColorModelT,
+} from "../interface/moderate/color.types";
 
 const ColorSchema = new Schema<ColorT, ColorModelT, ColorMethodsT>({
   label: {

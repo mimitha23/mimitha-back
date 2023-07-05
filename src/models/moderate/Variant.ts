@@ -3,7 +3,7 @@ import {
   VariantT,
   VariantModelT,
   VariantMethodsT,
-} from "./interface/variant.types";
+} from "../interface/moderate/variant.types";
 
 const VariantSchema = new Schema<VariantT, VariantModelT, VariantMethodsT>({
   type: {

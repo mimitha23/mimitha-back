@@ -1,4 +1,3 @@
-import { Async, AppError } from "../../lib";
 import {
   RegisteredProduct,
   ProductType,
@@ -6,7 +5,7 @@ import {
   Seasons,
   Gender,
 } from "../../models";
-import { ReqUserT } from "../../types";
+import { Async, AppError } from "../../lib";
 
 export const getRegisterProductFormSugestions = Async(async function (
   req,

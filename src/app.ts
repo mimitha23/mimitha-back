@@ -18,6 +18,7 @@ import productStylesRoutes from "./routes/Moderate/productStylesRoutes";
 import productTypeRoutes from "./routes/Moderate/productTypeRoutes";
 import variantRoutes from "./routes/Moderate/variantRoutes";
 import registerProductRoutes from "./routes/Moderate/registerProductRoutes";
+import textureRoutes from "./routes/Moderate/textureRoutes";
 
 const App = express();
 
@@ -63,13 +64,16 @@ NODE_MODE === "DEV" && App.use(morgan("dev"));
 // Auth
 App.use("/api/v1/auth", userAuthRoutes);
 App.use("/api/v1/auth/staff", staffAuthRoutes);
+
 // Moderate
 App.use("/api/v1/moderate/color", collorRoutes);
 App.use("/api/v1/moderate/variant", variantRoutes);
 App.use("/api/v1/moderate/product-type", productTypeRoutes);
 App.use("/api/v1/moderate/product-style", productStylesRoutes);
 App.use("/api/v1/moderate/register-product/", registerProductRoutes);
+App.use("/api/v1/moderate/texture/", textureRoutes);
 
+// Views
 App.get("/view", (req, res) => {
   res.status(200).render("emails/passwordReset", {
     userName: "Russ",
@@ -77,6 +81,7 @@ App.get("/view", (req, res) => {
   });
 });
 
+// Fetch unrecognised routes
 App.all("*", (req, _, next) => {
   next(new AppError(404, `can't find ${req.originalUrl} on this server`));
 });

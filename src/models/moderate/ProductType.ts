@@ -3,7 +3,7 @@ import {
   ProductTypeT,
   ProductTypeModelT,
   ProductTypeMethodsT,
-} from "./interface/productType.types";
+} from "../interface/moderate/productType.types";
 
 const ProductTypeSchema = new Schema<
   ProductTypeT,

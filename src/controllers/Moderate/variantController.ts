@@ -1,6 +1,5 @@
 import { Async, AppError, FileUplaod } from "../../lib";
 import { Variant } from "../../models";
-import { ReqUserT } from "../../types";
 
 const fileUpload = new FileUplaod({
   storage: "memoryStorage",

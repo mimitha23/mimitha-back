@@ -1,6 +1,5 @@
 import { Async, AppError } from "../../lib";
 import { Color } from "../../models";
-import { ReqUserT } from "../../types";
 
 export const createColor = Async(async function (req, res, next) {
   const body = req.body;

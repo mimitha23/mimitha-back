@@ -3,7 +3,7 @@ import {
   ProductStyleT,
   ProductStyleModelT,
   ProductStyleMethodsT,
-} from "./interface/productStyle.types";
+} from "../interface/moderate/productStyle.types";
 
 const ProductStyleSchema = new Schema<
   ProductStyleT,
