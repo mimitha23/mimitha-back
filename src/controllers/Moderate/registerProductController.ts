@@ -4,6 +4,7 @@ import {
   ProductStyle,
   Seasons,
   Gender,
+  Texture,
 } from "../../models";
 import { Async, AppError } from "../../lib";
 
@@ -20,7 +21,11 @@ export const getRegisterProductFormSugestions = Async(async function (
 
   const gender = await Gender.find().select("-__v");
 
-  res.status(200).json({ productTypes, productStyles, seasons, gender });
+  const textures = await Texture.find().select("-__v");
+
+  res
+    .status(200)
+    .json({ productTypes, productStyles, seasons, gender, textures });
 });
 
 export const create = Async(async function (req, res, next) {});

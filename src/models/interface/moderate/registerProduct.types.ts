@@ -2,36 +2,34 @@ import { Model } from "mongoose";
 
 export interface RegisteredProductT {
   productType: {
-    label: {
-      ka: string;
-      en: string;
-    };
+    ka: string;
+    en: string;
     query: string;
   };
 
-  style: [
+  styles: [
     {
-      label: {
-        ka: string;
-        en: string;
-      };
+      ka: string;
+      en: string;
       query: string;
     }
   ];
 
-  season: [
+  seasons: [
     {
-      ka: string;
-      en: string;
+      ka: "გაზაფხული" | "ზაფხული" | "შემოდგომა" | "ზამთარი";
+      en: "spring" | "summer" | "autumn" | "winter";
+      query: "spring" | "summer" | "autumn" | "winter";
     }
   ];
 
   gender: {
     ka: "მამაკაცი" | "ქალბატონი" | "უნისექსი";
     en: "male" | "female" | "unisex";
+    query: "male" | "female" | "unisex";
   };
 
-  texture: [
+  textures: [
     {
       ka: string;
       en: string;
