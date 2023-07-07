@@ -1,6 +1,8 @@
 import { Model } from "mongoose";
 
 export interface RegisteredProductT {
+  isEditable: boolean;
+
   productType: {
     ka: string;
     en: string;

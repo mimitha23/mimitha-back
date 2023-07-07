@@ -28,4 +28,43 @@ export const getRegisterProductFormSugestions = Async(async function (
     .json({ productTypes, productStyles, seasons, gender, textures });
 });
 
-export const create = Async(async function (req, res, next) {});
+export const registerProduct = Async(async function (req, res, next) {
+  const body = req.body;
+
+  await RegisteredProduct.create(body);
+
+  res.status(201).json("product is registered");
+});
+
+export const getAllRegisteredProducts = Async(async function (req, res, next) {
+  const docs = await RegisteredProduct.find();
+
+  res.status(200).json(docs);
+});
+
+export const updateRegisteredProduct = Async(async function (req, res, next) {
+  const { id } = req.params;
+  const body = req.body;
+
+  const doc = await RegisteredProduct.findByIdAndUpdate(
+    id,
+    {
+      $set: { ...body },
+    },
+    { new: true }
+  );
+
+  if (!doc) return next(new AppError(400, "there ane no such product"));
+
+  res.status(201).json(doc);
+});
+
+export const deleteRegisteredProduct = Async(async function (req, res, next) {
+  const { id } = req.params;
+
+  const doc = await RegisteredProduct.findByIdAndDelete(id);
+
+  if (!doc) return next(new AppError(400, "there ane no such product"));
+
+  res.status(204).json("product is deleted");
+});

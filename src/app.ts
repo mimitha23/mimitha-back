@@ -70,8 +70,8 @@ App.use("/api/v1/moderate/color", collorRoutes);
 App.use("/api/v1/moderate/variant", variantRoutes);
 App.use("/api/v1/moderate/product-type", productTypeRoutes);
 App.use("/api/v1/moderate/product-style", productStylesRoutes);
-App.use("/api/v1/moderate/register-product/", registerProductRoutes);
-App.use("/api/v1/moderate/texture/", textureRoutes);
+App.use("/api/v1/moderate/register-product", registerProductRoutes);
+App.use("/api/v1/moderate/texture", textureRoutes);
 
 // Views
 App.get("/view", (req, res) => {

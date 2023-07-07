@@ -6,17 +6,15 @@ import {
 } from "../interface/moderate/color.types";
 
 const ColorSchema = new Schema<ColorT, ColorModelT, ColorMethodsT>({
-  label: {
-    ka: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    en: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+  ka: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  en: {
+    type: String,
+    required: true,
+    unique: true,
   },
   hex: {
     type: String,

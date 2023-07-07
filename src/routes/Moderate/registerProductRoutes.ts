@@ -8,4 +8,14 @@ router
   .route("/form-sugestions")
   .get(registerProductController.getRegisterProductFormSugestions);
 
+router
+  .route("/:id")
+  .put(registerProductController.updateRegisteredProduct)
+  .delete(registerProductController.deleteRegisteredProduct);
+
+router
+  .route("/")
+  .post(registerProductController.registerProduct)
+  .get(registerProductController.getAllRegisteredProducts);
+
 export default router;

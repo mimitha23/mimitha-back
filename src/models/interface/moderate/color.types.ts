@@ -1,10 +1,8 @@
 import { Model } from "mongoose";
 
 export interface ColorT {
-  label: {
-    ka: string;
-    en: string;
-  };
+  ka: string;
+  en: string;
   hex: string;
 }
 
