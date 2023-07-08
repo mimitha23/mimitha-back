@@ -10,7 +10,7 @@ router
   .post(colorController.createColor);
 
 router
-  .route("/:id")
+  .route("/:colorId")
   .put(colorController.updateColor)
   .delete(colorController.deleteColor);
 

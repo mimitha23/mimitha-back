@@ -1,5 +1,5 @@
 import { Async, AppError } from "../../lib";
-import { Texture } from "../../models";
+import { Texture, RegisteredProduct } from "../../models";
 
 export const createTexture = Async(async function (req, res, next) {
   const body = req.body;
@@ -16,26 +16,33 @@ export const getAllTexture = Async(async function (req, res, next) {
 });
 
 export const updateTexture = Async(async function (req, res, next) {
-  const { id } = req.params;
+  const { textureId } = req.params;
   const body = req.body;
 
-  const doc = await Texture.findByIdAndUpdate(
-    id,
-    {
-      $set: { ...body },
-    },
-    { new: true }
-  );
+  const doc = await Texture.findById(textureId);
 
   if (!doc) return next(new AppError(400, "there ane no such texture"));
 
-  res.status(201).json(doc);
+  const oldTexture = { ...doc.toObject() };
+
+  doc.set(body);
+  await doc.save({ validateBeforeSave: true });
+
+  await RegisteredProduct.updateMany(
+    {
+      "textures._id": oldTexture._id,
+    },
+    { $set: { "textures.$.ka": body.ka, "textures.$.en": body.en } },
+    { runValidators: true, arrayFilters: [{ "textures._id": oldTexture._id }] }
+  );
+
+  res.status(201).json("texture is updated");
 });
 
 export const deleteTexture = Async(async function (req, res, next) {
-  const { id } = req.params;
+  const { textureId } = req.params;
 
-  const doc = await Texture.findByIdAndDelete(id);
+  const doc = await Texture.findByIdAndDelete(textureId);
 
   if (!doc) return next(new AppError(400, "there ane no such texture"));
 

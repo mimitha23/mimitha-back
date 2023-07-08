@@ -10,7 +10,7 @@ router
   .post(productStyleController.createProductStyle);
 
 router
-  .route("/:id")
+  .route("/:styleId")
   .put(productStyleController.updateProductStyle)
   .delete(productStyleController.deleteProductStyle);
 

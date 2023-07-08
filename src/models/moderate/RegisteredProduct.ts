@@ -15,6 +15,11 @@ const RegisteredProductSchema = new Schema<
     default: false,
   },
 
+  thumbnail: {
+    type: String,
+    // required: true,
+  },
+
   productType: {
     ka: { type: String, required: true },
     en: { type: String, required: true },
@@ -77,6 +82,11 @@ const RegisteredProductSchema = new Schema<
       en: { type: String, required: true },
     },
   ],
+
+  attachedProducts: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const RegisteredProduct = model<RegisteredProductT, RegisteredProductModelT>(

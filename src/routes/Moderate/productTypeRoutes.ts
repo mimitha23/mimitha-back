@@ -10,7 +10,7 @@ router
   .post(productTypeController.createProductType);
 
 router
-  .route("/:id")
+  .route("/:typeId")
   .put(productTypeController.updateProductType)
   .delete(productTypeController.deleteProductType);
 

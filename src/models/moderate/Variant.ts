@@ -26,7 +26,6 @@ const VariantSchema = new Schema<VariantT, VariantModelT, VariantMethodsT>({
   },
   icon: {
     type: String,
-    required: true,
   },
 });
 

@@ -16,11 +16,11 @@ export const getAllColor = Async(async function (req, res, next) {
 });
 
 export const updateColor = Async(async function (req, res, next) {
-  const { id } = req.params;
+  const { colorId } = req.params;
   const body = req.body;
 
   const doc = await Color.findByIdAndUpdate(
-    id,
+    colorId,
     {
       $set: { ...body },
     },
@@ -33,9 +33,9 @@ export const updateColor = Async(async function (req, res, next) {
 });
 
 export const deleteColor = Async(async function (req, res, next) {
-  const { id } = req.params;
+  const { colorId } = req.params;
 
-  const doc = await Color.findByIdAndDelete(id);
+  const doc = await Color.findByIdAndDelete(colorId);
 
   if (!doc) return next(new AppError(400, "there ane no such color"));
 

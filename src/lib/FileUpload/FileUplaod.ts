@@ -157,10 +157,10 @@ export default class FileUpload extends MulterConfig(
   }
 
   async updateFileOnFirebase({
-    downloadUrl,
-    contentType,
     file,
     folder,
+    contentType,
+    downloadUrl,
   }: UpdateFileOnFirebaseT): Promise<string> {
     await this.deleteFileOnFirebase(downloadUrl);
     return await this.uploadFileOnFirebase({ contentType, file, folder });

@@ -3,6 +3,8 @@ import { Model } from "mongoose";
 export interface RegisteredProductT {
   isEditable: boolean;
 
+  thumbnail: string;
+
   productType: {
     ka: string;
     en: string;
@@ -45,6 +47,8 @@ export interface RegisteredProductT {
       en: string;
     }
   ];
+
+  attachedProducts: number;
 }
 
 export interface RegisteredProductMethodsT {}

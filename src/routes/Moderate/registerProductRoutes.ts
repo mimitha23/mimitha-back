@@ -9,13 +9,19 @@ router
   .get(registerProductController.getRegisterProductFormSugestions);
 
 router
-  .route("/:id")
-  .put(registerProductController.updateRegisteredProduct)
+  .route("/:productId")
+  .put(
+    registerProductController.uploadMedia("media"),
+    registerProductController.updateRegisteredProduct
+  )
   .delete(registerProductController.deleteRegisteredProduct);
 
 router
   .route("/")
-  .post(registerProductController.registerProduct)
+  .post(
+    registerProductController.uploadMedia("media"),
+    registerProductController.registerProduct
+  )
   .get(registerProductController.getAllRegisteredProducts);
 
 export default router;

@@ -21,7 +21,7 @@ export default class FirebaseConfig {
     const indexOfEndPath = imagePath.indexOf("?");
     imagePath = imagePath
       .substring(0, indexOfEndPath)
-      .replace(/%2F/g, "/")
+      .replace(/%2F/gi, "/")
       .replace(/%20/g, " ");
 
     return imagePath;

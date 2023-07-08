@@ -12,6 +12,10 @@ export const uploadMedia = (filename: string) =>
 export const createVariant = Async(async function (req, res, next) {
   const body = req.body;
 
+  if (!req.file) return next(new AppError(400, "please upload icon"));
+
+  const newVariant = await new Variant(body).save();
+
   let downloadUrl;
 
   try {
@@ -24,7 +28,8 @@ export const createVariant = Async(async function (req, res, next) {
     return next(new AppError(400, "occured error during file upload"));
   }
 
-  await Variant.create({ ...body, icon: downloadUrl });
+  newVariant.icon = downloadUrl;
+  await newVariant.save();
 
   res.status(201).json("variant is created");
 });
@@ -36,7 +41,7 @@ export const getAllVariant = Async(async function (req, res, next) {
 });
 
 export const updateVariant = Async(async function (req, res, next) {
-  const { id } = req.params;
+  const { variantId } = req.params;
   const body = req.body;
 
   let downloadUrl;
@@ -50,14 +55,17 @@ export const updateVariant = Async(async function (req, res, next) {
         downloadUrl: body.icon,
       });
     } catch (error) {
-      return next(new AppError(400, "occured error during file upload"));
+      return next(new AppError(400, "occured error during upload icon"));
     }
   }
 
+  const updatedBody = { ...body };
+  if (downloadUrl) updatedBody.icon = downloadUrl;
+
   const doc = await Variant.findByIdAndUpdate(
-    id,
+    variantId,
     {
-      $set: { ...body, icon: downloadUrl },
+      $set: { ...updatedBody },
     },
     { new: true }
   );
@@ -68,19 +76,19 @@ export const updateVariant = Async(async function (req, res, next) {
 });
 
 export const deleteVariant = Async(async function (req, res, next) {
-  const { id } = req.params;
+  const { variantId } = req.params;
 
-  const doc = await Variant.findById(id);
+  const doc = await Variant.findById(variantId);
 
   if (!doc) return next(new AppError(400, "there ane no such variant"));
 
   try {
     await fileUpload.deleteFileOnFirebase(doc.icon);
   } catch (error) {
-    return next(new AppError(400, "occured error during delete file"));
+    return next(new AppError(400, "occured error during delete icon"));
   }
 
-  await Variant.findByIdAndDelete(id);
+  await Variant.findByIdAndDelete(variantId);
 
   res.status(204).json("variant is deleted");
 });

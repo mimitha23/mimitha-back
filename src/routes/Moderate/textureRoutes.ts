@@ -10,7 +10,7 @@ router
   .post(textureController.createTexture);
 
 router
-  .route("/:id")
+  .route("/:textureId")
   .put(textureController.updateTexture)
   .delete(textureController.deleteTexture);
 

@@ -10,7 +10,7 @@ router
   .post(variantController.uploadMedia("icon"), variantController.createVariant);
 
 router
-  .route("/:id")
+  .route("/:variantId")
   .put(
     variantController.uploadMedia("newIcon"),
     variantController.updateVariant
