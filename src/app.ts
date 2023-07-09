@@ -14,11 +14,12 @@ import staffAuthRoutes from "./routes/Auth/staffAuthRoutes";
 
 // Moderate
 import collorRoutes from "./routes/Moderate/collorRoutes";
-import productStylesRoutes from "./routes/Moderate/productStylesRoutes";
-import productTypeRoutes from "./routes/Moderate/productTypeRoutes";
 import variantRoutes from "./routes/Moderate/variantRoutes";
-import registerProductRoutes from "./routes/Moderate/registerProductRoutes";
 import textureRoutes from "./routes/Moderate/textureRoutes";
+import productTypeRoutes from "./routes/Moderate/productTypeRoutes";
+import productStylesRoutes from "./routes/Moderate/productStylesRoutes";
+import registerProductRoutes from "./routes/Moderate/registerProductRoutes";
+import developeProductRoutes from "./routes/Moderate/developeProductRoutes";
 
 const App = express();
 
@@ -67,11 +68,12 @@ App.use("/api/v1/auth/staff", staffAuthRoutes);
 
 // Moderate
 App.use("/api/v1/moderate/color", collorRoutes);
+App.use("/api/v1/moderate/texture", textureRoutes);
 App.use("/api/v1/moderate/variant", variantRoutes);
 App.use("/api/v1/moderate/product-type", productTypeRoutes);
 App.use("/api/v1/moderate/product-style", productStylesRoutes);
 App.use("/api/v1/moderate/register-product", registerProductRoutes);
-App.use("/api/v1/moderate/texture", textureRoutes);
+App.use("/api/v1/moderate/develope-product", developeProductRoutes);
 
 // Views
 App.get("/view", (req, res) => {

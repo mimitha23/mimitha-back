@@ -7,14 +7,14 @@ const router = Router();
 router
   .route("/")
   .get(variantController.getAllVariant)
-  .post(variantController.uploadMedia("icon"), variantController.createVariant);
+  .post(
+    variantController.uploadMedia("media"),
+    variantController.createVariant
+  );
 
 router
   .route("/:variantId")
-  .put(
-    variantController.uploadMedia("newIcon"),
-    variantController.updateVariant
-  )
+  .put(variantController.uploadMedia("media"), variantController.updateVariant)
   .delete(variantController.deleteVariant);
 
 router.route("/types").get(variantController.getExistingVariantTypes);
