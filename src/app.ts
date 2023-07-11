@@ -61,6 +61,7 @@ App.use(
 );
 
 NODE_MODE === "DEV" && App.use(morgan("dev"));
+// ":data[web] :method :url :status :response-time-ms :total-time[digits] - :res[content-length]"
 
 // Auth
 App.use("/api/v1/auth", userAuthRoutes);

@@ -55,3 +55,15 @@ export interface UploadFileOnFirebaseT {
 export interface UpdateFileOnFirebaseT extends UploadFileOnFirebaseT {
   downloadUrl: string;
 }
+
+export interface UploadMultipleFilesOnFirebaseT
+  extends Omit<UploadFileOnFirebaseT, "file"> {
+  files: Express.Multer.File[];
+  folder: keyof typeof firebaseFolders;
+  contentType: "image/svg+xml" | "image/webp";
+}
+
+export interface UpdateMultipleFilesOnFirebaseT
+  extends UploadMultipleFilesOnFirebaseT {
+  downloadUrls: string[];
+}

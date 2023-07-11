@@ -1,18 +1,78 @@
-import { Async, AppError } from "../../lib";
-import { Color, Variant } from "../../models";
+import { Async, AppError, FileUplaod } from "../../lib";
+import {
+  Color,
+  Variant,
+  DevelopedProduct,
+  RegisteredProduct,
+} from "../../models";
+
+const fileUpload = new FileUplaod({
+  storage: "memoryStorage",
+  upload: "any",
+});
+
+export const uploadMedia = (filename: string) =>
+  fileUpload.uploadMedia({ filename });
 
 export const attachDevelopedProduct = Async(async function (req, res, next) {
   const body = req.body;
 
-  // await Color.create(body);
+  if (!req.files) return next(new AppError(400, "please upload assets"));
 
-  res.status(201).json("color is created");
+  const developedProduct = await new DevelopedProduct(body).save();
+
+  let downloadUrls;
+
+  try {
+    downloadUrls = await fileUpload.uploadMultiplesFileOnFirebase({
+      files: req.files,
+      contentType: "image/webp",
+      folder: "products",
+    });
+  } catch (error) {
+    return next(new AppError(400, "occured error during upload assets"));
+  }
+
+  developedProduct.assets = downloadUrls;
+  await developedProduct.save();
+
+  await RegisteredProduct.findByIdAndUpdate(developedProduct.product, {
+    $inc: { attachedProducts: 1 },
+    $push: { developedProducts: developedProduct.product },
+  });
+
+  res.status(201).json("product is attached");
 });
 
 export const getAllDevelopedProducts = Async(async function (req, res, next) {
-  const docs: any[] = [];
+  const { select } = req.query;
+
+  const full = "-__v";
+  const short = "title price color inStock assets rating soldOut";
+
+  let fieldsToSelect = "";
+
+  if (select === "short" || !select) fieldsToSelect = short;
+  else if (select === "full") fieldsToSelect = full;
+  else fieldsToSelect = select as string;
+
+  const docs = await DevelopedProduct.find().select(fieldsToSelect);
 
   res.status(200).json(docs);
+});
+
+export const getDevelopedProduct = Async(async function (req, res, next) {
+  const { productId } = req.params;
+
+  const doc = await DevelopedProduct.findById(productId)
+    .populate({
+      path: "product",
+    })
+    .populate({ path: "variants" });
+
+  if (!doc) return next(new AppError(400, "there ane no such product"));
+
+  res.status(200).json(doc);
 });
 
 export const updateDevelopedProduct = Async(async function (req, res, next) {

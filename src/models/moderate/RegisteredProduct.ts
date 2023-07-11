@@ -87,6 +87,13 @@ const RegisteredProductSchema = new Schema<
     type: Number,
     default: 0,
   },
+
+  developedProducts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "DevelopedProduct",
+    },
+  ],
 });
 
 const RegisteredProduct = model<RegisteredProductT, RegisteredProductModelT>(

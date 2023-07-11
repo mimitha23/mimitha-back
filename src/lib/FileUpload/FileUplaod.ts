@@ -10,6 +10,8 @@ import {
   UploadMediaT,
   UploadFileOnFirebaseT,
   UpdateFileOnFirebaseT,
+  UploadMultipleFilesOnFirebaseT,
+  UpdateMultipleFilesOnFirebaseT,
 } from "./fileupload";
 import { firebaseFolders } from "../../config/config";
 import { uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
@@ -124,6 +126,18 @@ export default class FileUpload extends MulterConfig(
     };
   }
 
+  async convertFileAndSaveToMemory(file: Buffer): Promise<Buffer> {
+    return await this.convertAndSaveToMemory(file);
+  }
+
+  async convertMultipleFileAndSaveToMemory(files: Buffer[]): Promise<Buffer[]> {
+    return await Promise.all(
+      files.map(async (file) => {
+        return await this.convertAndSaveToMemory(file);
+      })
+    );
+  }
+
   async uploadFileOnFirebase({
     file,
     folder,
@@ -150,7 +164,7 @@ export default class FileUpload extends MulterConfig(
     return downloadUrl;
   }
 
-  async deleteFileOnFirebase(downloadUrl: string) {
+  async deleteFileOnFirebase(downloadUrl: string): Promise<any> {
     const filename = this.getPathStorageFromUrl(downloadUrl);
     const storageRef = this.getStorageRef(filename);
     await deleteObject(storageRef);
@@ -164,5 +178,39 @@ export default class FileUpload extends MulterConfig(
   }: UpdateFileOnFirebaseT): Promise<string> {
     await this.deleteFileOnFirebase(downloadUrl);
     return await this.uploadFileOnFirebase({ contentType, file, folder });
+  }
+
+  async uploadMultiplesFileOnFirebase({
+    files,
+    contentType,
+    folder,
+  }: UploadMultipleFilesOnFirebaseT): Promise<string[]> {
+    return await Promise.all(
+      files.map(async (file) => {
+        return this.uploadFileOnFirebase({ file, contentType, folder });
+      })
+    );
+  }
+
+  async deleteMultiplesFileOnFirebase(downloadUrls: string[]): Promise<any> {
+    return await Promise.all(
+      downloadUrls.map(async (url) => {
+        return this.deleteFileOnFirebase(url);
+      })
+    );
+  }
+
+  async updateMultipleFilesOnFirebase({
+    files,
+    folder,
+    contentType,
+    downloadUrls,
+  }: UpdateMultipleFilesOnFirebaseT): Promise<string[]> {
+    await this.deleteMultiplesFileOnFirebase(downloadUrls);
+    return await this.uploadMultiplesFileOnFirebase({
+      contentType,
+      files,
+      folder,
+    });
   }
 }

@@ -5,16 +5,20 @@ import { checkAuth, restrictByRoles } from "../../middlewares";
 const router = Router();
 
 router
-  .route("/")
-  .get(developeProductController.getAllDevelopedProducts)
-  .post(developeProductController.attachDevelopedProduct);
-
-router
   .route("/suggestions")
   .get(developeProductController.getDevelopeProductFormSugestions);
 
 router
-  .route("/:productId")
+  .route("/:registeredProductId/products")
+  .get(developeProductController.getAllDevelopedProducts)
+  .post(
+    developeProductController.uploadMedia("media"),
+    developeProductController.attachDevelopedProduct
+  );
+
+router
+  .route("/:registeredProductId/products/:productId")
+  .get(developeProductController.getDevelopedProduct)
   .put(developeProductController.updateDevelopedProduct)
   .delete(developeProductController.deleteDevelopedProduct);
 

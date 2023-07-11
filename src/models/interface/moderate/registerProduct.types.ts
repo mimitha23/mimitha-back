@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { Model, Schema } from "mongoose";
 
 export interface RegisteredProductT {
   isEditable: boolean;
@@ -49,6 +49,8 @@ export interface RegisteredProductT {
   ];
 
   attachedProducts: number;
+
+  developedProducts: Schema.Types.ObjectId[];
 }
 
 export interface RegisteredProductMethodsT {}
