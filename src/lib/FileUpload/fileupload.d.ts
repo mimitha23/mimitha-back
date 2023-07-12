@@ -1,6 +1,8 @@
 import sharp, { AvailableFormatInfo, FormatEnum } from "sharp";
 import { firebaseFolders } from "../../config/config";
 
+export type FileT = Express.Multer.File;
+
 export interface FileUploadT {
   upload: "single" | "any";
   storage: "memoryStorage" | "diskStorage";
@@ -47,7 +49,7 @@ export interface CreateMulterDestionationT {
 }
 
 export interface UploadFileOnFirebaseT {
-  file: Express.Multer.File;
+  file: FileT;
   folder: keyof typeof firebaseFolders;
   contentType: "image/svg+xml" | "image/webp";
 }
@@ -58,7 +60,7 @@ export interface UpdateFileOnFirebaseT extends UploadFileOnFirebaseT {
 
 export interface UploadMultipleFilesOnFirebaseT
   extends Omit<UploadFileOnFirebaseT, "file"> {
-  files: Express.Multer.File[];
+  files: FileT[];
   folder: keyof typeof firebaseFolders;
   contentType: "image/svg+xml" | "image/webp";
 }

@@ -54,6 +54,10 @@ const DevelopedProductSchema = new Schema<
       type: String,
       required: true,
     },
+    _id: {
+      type: String,
+      required: true,
+    },
   },
 
   size: [

@@ -26,10 +26,10 @@ export const attachDevelopedProduct = Async(async function (req, res, next) {
   try {
     downloadUrls = await fileUpload.uploadMultiplesFileOnFirebase({
       files: req.files,
-      contentType: "image/webp",
       folder: "products",
+      contentType: "image/webp",
     });
-  } catch (error) {
+  } catch (error: any) {
     return next(new AppError(400, "occured error during upload assets"));
   }
 
@@ -89,9 +89,15 @@ export const updateDevelopedProduct = Async(async function (req, res, next) {
 export const deleteDevelopedProduct = Async(async function (req, res, next) {
   const { productId } = req.params;
 
-  const doc = {};
+  const doc = await DevelopedProduct.findByIdAndDelete(productId);
 
-  if (!doc) return next(new AppError(400, "there ane no such color"));
+  if (!doc) return next(new AppError(400, "there ane no such product"));
+
+  try {
+    await fileUpload.deleteMultipleFilesOnFirebase(doc.assets);
+  } catch (error) {
+    return next(new AppError(400, "occured error during delete thumbnail"));
+  }
 
   res.status(204).json("color is deleted");
 });

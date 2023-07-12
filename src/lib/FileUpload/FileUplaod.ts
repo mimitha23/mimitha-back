@@ -6,6 +6,7 @@ import FileUploadUtils from "./FileUploadUtils";
 import FirebaseConfig from "./FirebaseConfig";
 
 import {
+  FileT,
   FileUploadT,
   UploadMediaT,
   UploadFileOnFirebaseT,
@@ -15,6 +16,7 @@ import {
 } from "./fileupload";
 import { firebaseFolders } from "../../config/config";
 import { uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { error } from "console";
 
 export default class FileUpload extends MulterConfig(
   SharpConfig(FileUploadUtils(FirebaseConfig))
@@ -36,7 +38,7 @@ export default class FileUpload extends MulterConfig(
     destination = "",
     // sharp
     multy = true,
-    quality = 90,
+    quality = 80,
     format = "webp",
     resize = false,
     width = 500,
@@ -126,48 +128,47 @@ export default class FileUpload extends MulterConfig(
     };
   }
 
-  async convertFileAndSaveToMemory(file: Buffer): Promise<Buffer> {
-    return await this.convertAndSaveToMemory(file);
-  }
-
-  async convertMultipleFileAndSaveToMemory(files: Buffer[]): Promise<Buffer[]> {
-    return await Promise.all(
-      files.map(async (file) => {
-        return await this.convertAndSaveToMemory(file);
-      })
-    );
-  }
-
+  // Upload Single On Firebase
   async uploadFileOnFirebase({
     file,
     folder,
     contentType,
   }: UploadFileOnFirebaseT): Promise<string> {
-    const configuredFileName = this.generateFilenameForFirebase(
-      file.originalname
-    );
+    try {
+      const convertedFile = await this.convertFile(file);
 
-    const storageRef = this.getStorageRef(
-      `${firebaseFolders[folder]}/${configuredFileName}`
-    );
+      const configuredFileName = this.generateFilenameForFirebase(
+        convertedFile.originalname
+      );
 
-    const uploadedFileRef = await uploadBytes(
-      storageRef,
-      Buffer.from(file.buffer),
-      {
-        contentType,
-      }
-    );
+      const storageRef = this.getStorageRef(
+        `${firebaseFolders[folder]}/${configuredFileName}`
+      );
 
-    const downloadUrl = await getDownloadURL(uploadedFileRef.ref);
+      const uploadedFileRef = await uploadBytes(
+        storageRef,
+        Buffer.from(convertedFile.buffer),
+        {
+          contentType,
+        }
+      );
 
-    return downloadUrl;
+      const downloadUrl = await getDownloadURL(uploadedFileRef.ref);
+
+      return downloadUrl;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async deleteFileOnFirebase(downloadUrl: string): Promise<any> {
-    const filename = this.getPathStorageFromUrl(downloadUrl);
-    const storageRef = this.getStorageRef(filename);
-    await deleteObject(storageRef);
+    try {
+      const filename = this.getPathStorageFromUrl(downloadUrl);
+      const storageRef = this.getStorageRef(filename);
+      await deleteObject(storageRef);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async updateFileOnFirebase({
@@ -176,28 +177,43 @@ export default class FileUpload extends MulterConfig(
     contentType,
     downloadUrl,
   }: UpdateFileOnFirebaseT): Promise<string> {
-    await this.deleteFileOnFirebase(downloadUrl);
-    return await this.uploadFileOnFirebase({ contentType, file, folder });
+    try {
+      await this.deleteFileOnFirebase(downloadUrl);
+      return await this.uploadFileOnFirebase({ contentType, file, folder });
+    } catch (error) {
+      throw error;
+    }
   }
 
+  // Upload Multiple On Firebase
   async uploadMultiplesFileOnFirebase({
     files,
     contentType,
     folder,
   }: UploadMultipleFilesOnFirebaseT): Promise<string[]> {
-    return await Promise.all(
-      files.map(async (file) => {
-        return this.uploadFileOnFirebase({ file, contentType, folder });
-      })
-    );
+    try {
+      const convertedFiles: FileT[] = await this.convertMultipleFiles(files);
+
+      return await Promise.all(
+        convertedFiles.map(async (file: FileT) => {
+          return this.uploadFileOnFirebase({ file, contentType, folder });
+        })
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 
-  async deleteMultiplesFileOnFirebase(downloadUrls: string[]): Promise<any> {
-    return await Promise.all(
-      downloadUrls.map(async (url) => {
-        return this.deleteFileOnFirebase(url);
-      })
-    );
+  async deleteMultipleFilesOnFirebase(downloadUrls: string[]): Promise<any> {
+    try {
+      return await Promise.all(
+        downloadUrls.map(async (url) => {
+          return this.deleteFileOnFirebase(url);
+        })
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 
   async updateMultipleFilesOnFirebase({
@@ -206,11 +222,15 @@ export default class FileUpload extends MulterConfig(
     contentType,
     downloadUrls,
   }: UpdateMultipleFilesOnFirebaseT): Promise<string[]> {
-    await this.deleteMultiplesFileOnFirebase(downloadUrls);
-    return await this.uploadMultiplesFileOnFirebase({
-      contentType,
-      files,
-      folder,
-    });
+    try {
+      await this.deleteMultiplesFileOnFirebase(downloadUrls);
+      return await this.uploadMultiplesFileOnFirebase({
+        contentType,
+        files,
+        folder,
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -13,6 +13,7 @@ export interface DevelopedProductT {
     ka: string;
     en: string;
     hex: string;
+    _id: string;
   };
   size: [
     {
