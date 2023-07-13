@@ -19,25 +19,20 @@ export const updateProductType = Async(async function (req, res, next) {
   const { typeId } = req.params;
   const body = req.body;
 
-  const doc = await ProductType.findById(typeId);
+  const doc = await ProductType.findByIdAndUpdate(typeId, {
+    $set: { ...body },
+  });
 
   if (!doc) return next(new AppError(400, "there ane no such product type"));
 
-  const oldProductType = { ...doc.toObject() };
-
-  doc.set(body);
-  await doc.save({ validateBeforeSave: true });
-
   await RegisteredProduct.updateMany(
     {
-      $and: [
-        { "productType.ka": oldProductType.ka },
-        { "productType.en": oldProductType.en },
-      ],
+      "productType._id": doc._id,
     },
     {
-      $set: { productType: { ...body } },
-    }
+      $set: { productType: { ...body, _id: doc._id } },
+    },
+    { runValidators: true }
   );
 
   res.status(201).json("product type is updated");

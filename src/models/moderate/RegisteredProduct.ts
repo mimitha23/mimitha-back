@@ -24,6 +24,7 @@ const RegisteredProductSchema = new Schema<
     ka: { type: String, required: true },
     en: { type: String, required: true },
     query: { type: String, required: true },
+    _id: { type: String, required: true },
   },
 
   styles: [

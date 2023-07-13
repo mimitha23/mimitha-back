@@ -19,21 +19,16 @@ export const updateTexture = Async(async function (req, res, next) {
   const { textureId } = req.params;
   const body = req.body;
 
-  const doc = await Texture.findById(textureId);
+  const doc = await Texture.findByIdAndUpdate(textureId, { $set: { ...body } });
 
   if (!doc) return next(new AppError(400, "there ane no such texture"));
 
-  const oldTexture = { ...doc.toObject() };
-
-  doc.set(body);
-  await doc.save({ validateBeforeSave: true });
-
   await RegisteredProduct.updateMany(
     {
-      "textures._id": oldTexture._id,
+      "textures._id": doc._id,
     },
     { $set: { "textures.$.ka": body.ka, "textures.$.en": body.en } },
-    { runValidators: true, arrayFilters: [{ "textures._id": oldTexture._id }] }
+    { runValidators: true, arrayFilters: [{ "textures._id": doc._id }] }
   );
 
   res.status(201).json("texture is updated");

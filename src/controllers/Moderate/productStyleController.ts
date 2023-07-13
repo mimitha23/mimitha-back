@@ -19,25 +19,22 @@ export const updateProductStyle = Async(async function (req, res, next) {
   const { styleId } = req.params;
   const body = req.body;
 
-  const doc = await ProductStyle.findById(styleId);
+  const doc = await ProductStyle.findByIdAndUpdate(styleId, {
+    $set: { ...body },
+  });
 
   if (!doc) return next(new AppError(400, "there ane no such product type"));
 
-  const oldProductStyle = { ...doc.toObject() };
-
-  doc.set(body);
-  await doc.save({ validateBeforeSave: true });
-
   await RegisteredProduct.updateMany(
     {
-      "styles._id": oldProductStyle._id,
+      "styles._id": doc._id,
     },
     {
-      $set: { "styles.$": { _id: oldProductStyle._id, ...body } },
+      $set: { "styles.$": { ...body, _id: doc._id } },
     },
     {
       runValidators: true,
-      arrayFilters: [{ "styles._id": oldProductStyle._id }],
+      arrayFilters: [{ "styles._id": doc._id }],
     }
   );
 

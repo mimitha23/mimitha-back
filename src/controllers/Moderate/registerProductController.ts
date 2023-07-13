@@ -1,5 +1,6 @@
 import {
   RegisteredProduct,
+  DevelopedProduct,
   ProductType,
   ProductStyle,
   Seasons,
@@ -105,12 +106,26 @@ export const updateRegisteredProduct = Async(async function (req, res, next) {
 export const deleteRegisteredProduct = Async(async function (req, res, next) {
   const { productId } = req.params;
 
-  const doc = await RegisteredProduct.findByIdAndDelete(productId);
+  const doc = await RegisteredProduct.findByIdAndDelete(productId).populate({
+    path: "developedProducts",
+    select: "assets",
+  });
 
   if (!doc) return next(new AppError(400, "there ane no such product"));
 
+  const developedProductsAssets = doc.developedProducts.flatMap(
+    (product: any) => product.assets
+  );
+
+  const developedProductsIds = doc.developedProducts.flatMap(
+    (product: any) => product._id
+  );
+
+  await DevelopedProduct.deleteMany({ _id: { $in: developedProductsIds } });
+
   try {
     await fileUpload.deleteFileOnFirebase(doc.thumbnail);
+    await fileUpload.deleteMultipleFilesOnFirebase(developedProductsAssets);
   } catch (error) {
     return next(new AppError(400, "occured error during delete thumbnail"));
   }

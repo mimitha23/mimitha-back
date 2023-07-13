@@ -19,12 +19,12 @@ export const attachDevelopedProduct = Async(async function (req, res, next) {
 
   if (!req.files) return next(new AppError(400, "please upload assets"));
 
-  const developedProduct = await new DevelopedProduct(body).save();
+  const doc = await new DevelopedProduct(body).save();
 
   let downloadUrls;
 
   try {
-    downloadUrls = await fileUpload.uploadMultiplesFileOnFirebase({
+    downloadUrls = await fileUpload.uploadMultipleFilesOnFirebase({
       files: req.files,
       folder: "products",
       contentType: "image/webp",
@@ -33,19 +33,19 @@ export const attachDevelopedProduct = Async(async function (req, res, next) {
     return next(new AppError(400, "occured error during upload assets"));
   }
 
-  developedProduct.assets = downloadUrls;
-  await developedProduct.save();
+  doc.assets = downloadUrls;
+  await doc.save();
 
-  await RegisteredProduct.findByIdAndUpdate(developedProduct.product, {
+  await RegisteredProduct.findByIdAndUpdate(doc.product, {
     $inc: { attachedProducts: 1 },
-    $push: { developedProducts: developedProduct.product },
+    $push: { developedProducts: doc._id },
   });
 
   res.status(201).json("product is attached");
 });
 
 export const getAllDevelopedProducts = Async(async function (req, res, next) {
-  const { select } = req.query;
+  const { select, is_public } = req.query;
 
   const full = "-__v";
   const short = "title price color inStock assets rating soldOut";
@@ -56,7 +56,11 @@ export const getAllDevelopedProducts = Async(async function (req, res, next) {
   else if (select === "full") fieldsToSelect = full;
   else fieldsToSelect = select as string;
 
-  const docs = await DevelopedProduct.find().select(fieldsToSelect);
+  const query: { isPublic?: boolean } = {};
+
+  if (is_public === "1") query.isPublic = true;
+
+  const docs = await DevelopedProduct.find(query).select(fieldsToSelect);
 
   res.status(200).json(docs);
 });
@@ -79,9 +83,56 @@ export const updateDevelopedProduct = Async(async function (req, res, next) {
   const { productId } = req.params;
   const body = req.body;
 
-  const doc = {};
+  const isFilesToDelete =
+    Array.isArray(body.filesToDelete) && body.filesToDelete[0] ? true : false;
 
-  if (!doc) return next(new AppError(400, "there ane no such color"));
+  if (isFilesToDelete && Array.isArray(body.assets))
+    body.assets = body.assets.filter(
+      (asset: string) => !body.filesToDelete.includes(asset)
+    );
+
+  const doc = await DevelopedProduct.findByIdAndUpdate(
+    productId,
+    {
+      $set: { ...body },
+    },
+    { new: true }
+  );
+
+  if (!doc) return next(new AppError(400, "there ane no such product"));
+
+  let downloadUrls;
+
+  // upload files and delete removed files
+  if (req.files) {
+    try {
+      downloadUrls = await fileUpload.updateMultipleFilesOnFirebase({
+        files: req.files,
+        folder: "products",
+        contentType: "image/webp",
+        downloadUrls: body.filesToDelete || [],
+      });
+    } catch (error: any) {
+      return next(
+        new AppError(400, error.message || "occured error during update assets")
+      );
+    }
+    // if there are no new files but are removed files, delete them
+  } else if (isFilesToDelete) {
+    try {
+      await fileUpload.deleteMultipleFilesOnFirebase(body.filesToDelete);
+    } catch (error) {
+      return next(
+        new AppError(400, "occured error during delete removed files")
+      );
+    }
+  }
+
+  // if there were new files, join them to previous assets
+  if (downloadUrls && Array.isArray(downloadUrls))
+    doc.set("assets", [...doc.assets, ...downloadUrls]);
+
+  await doc.save();
 
   res.status(201).json(doc);
 });
@@ -98,6 +149,11 @@ export const deleteDevelopedProduct = Async(async function (req, res, next) {
   } catch (error) {
     return next(new AppError(400, "occured error during delete thumbnail"));
   }
+
+  await RegisteredProduct.findByIdAndUpdate(doc.product, {
+    $inc: { attachedProducts: -1 },
+    $pull: { developedProducts: doc._id },
+  });
 
   res.status(204).json("color is deleted");
 });

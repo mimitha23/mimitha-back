@@ -19,7 +19,10 @@ router
 router
   .route("/:registeredProductId/products/:productId")
   .get(developeProductController.getDevelopedProduct)
-  .put(developeProductController.updateDevelopedProduct)
+  .put(
+    developeProductController.uploadMedia("media"),
+    developeProductController.updateDevelopedProduct
+  )
   .delete(developeProductController.deleteDevelopedProduct);
 
 export default router;

@@ -9,6 +9,7 @@ export interface RegisteredProductT {
     ka: string;
     en: string;
     query: string;
+    _id: string;
   };
 
   styles: [

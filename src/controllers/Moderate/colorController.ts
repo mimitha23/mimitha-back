@@ -1,5 +1,5 @@
 import { Async, AppError } from "../../lib";
-import { Color } from "../../models";
+import { Color, DevelopedProduct } from "../../models";
 
 export const createColor = Async(async function (req, res, next) {
   const body = req.body;
@@ -28,6 +28,18 @@ export const updateColor = Async(async function (req, res, next) {
   );
 
   if (!doc) return next(new AppError(400, "there ane no such color"));
+
+  await DevelopedProduct.updateMany(
+    {
+      "color._id": doc._id,
+    },
+    {
+      $set: { color: { ...body, _id: doc._id } },
+    },
+    {
+      runValidators: true,
+    }
+  );
 
   res.status(201).json(doc);
 });

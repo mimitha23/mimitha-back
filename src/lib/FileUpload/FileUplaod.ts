@@ -38,7 +38,7 @@ export default class FileUpload extends MulterConfig(
     destination = "",
     // sharp
     multy = true,
-    quality = 80,
+    quality = 30,
     format = "webp",
     resize = false,
     width = 500,
@@ -153,7 +153,7 @@ export default class FileUpload extends MulterConfig(
         }
       );
 
-      const downloadUrl = await getDownloadURL(uploadedFileRef.ref);
+      const downloadUrl = getDownloadURL(uploadedFileRef.ref);
 
       return downloadUrl;
     } catch (error) {
@@ -165,7 +165,7 @@ export default class FileUpload extends MulterConfig(
     try {
       const filename = this.getPathStorageFromUrl(downloadUrl);
       const storageRef = this.getStorageRef(filename);
-      await deleteObject(storageRef);
+      return deleteObject(storageRef);
     } catch (error) {
       throw error;
     }
@@ -178,7 +178,7 @@ export default class FileUpload extends MulterConfig(
     downloadUrl,
   }: UpdateFileOnFirebaseT): Promise<string> {
     try {
-      await this.deleteFileOnFirebase(downloadUrl);
+      if (downloadUrl) await this.deleteFileOnFirebase(downloadUrl);
       return await this.uploadFileOnFirebase({ contentType, file, folder });
     } catch (error) {
       throw error;
@@ -186,7 +186,7 @@ export default class FileUpload extends MulterConfig(
   }
 
   // Upload Multiple On Firebase
-  async uploadMultiplesFileOnFirebase({
+  async uploadMultipleFilesOnFirebase({
     files,
     contentType,
     folder,
@@ -223,8 +223,10 @@ export default class FileUpload extends MulterConfig(
     downloadUrls,
   }: UpdateMultipleFilesOnFirebaseT): Promise<string[]> {
     try {
-      await this.deleteMultiplesFileOnFirebase(downloadUrls);
-      return await this.uploadMultiplesFileOnFirebase({
+      if (Array.isArray(downloadUrls) && downloadUrls[0])
+        await this.deleteMultipleFilesOnFirebase(downloadUrls);
+
+      return await this.uploadMultipleFilesOnFirebase({
         contentType,
         files,
         folder,
