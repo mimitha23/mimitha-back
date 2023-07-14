@@ -6,12 +6,28 @@ const router = Router();
 
 router
   .route("/")
-  .get(productStyleController.getAllProductStyle)
-  .post(productStyleController.createProductStyle);
+  .get(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    productStyleController.getAllProductStyle
+  )
+  .post(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    productStyleController.createProductStyle
+  );
 
 router
   .route("/:styleId")
-  .put(productStyleController.updateProductStyle)
-  .delete(productStyleController.deleteProductStyle);
+  .put(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    productStyleController.updateProductStyle
+  )
+  .delete(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    productStyleController.deleteProductStyle
+  );
 
 export default router;

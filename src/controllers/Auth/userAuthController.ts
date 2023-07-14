@@ -2,6 +2,7 @@ import { Async, JWT, AppError, Email } from "../../lib";
 import UserUtils from "../../utils/UserUtils/UserUtils";
 import { ReqUserT } from "../../types";
 import { User } from "../../models";
+import { refresh, logout } from "../handlerFactory";
 
 export const register = Async(async function (req, res, next) {
   const { fullname, username, email, password } = req.body;
@@ -72,10 +73,7 @@ export const googleLogin = Async(async function (req, res, next) {
   res.status(201).json({ accessToken, user: userData });
 });
 
-export const logout = Async(async function (req, res, next) {
-  res.clearCookie("authorization");
-  res.end();
-});
+export const logoutUser = logout();
 
 // 1.0
 export const forgotPassword = Async(async function (req, res, next) {
@@ -125,7 +123,7 @@ export const updatePassword = Async(async function (req, res, next) {
   res.status(201).json({ passwordIsUpdated: true });
 });
 
-// 2.0
+// 2.0 for users authenticated by the email and password
 export const changePassword = Async(async function (req, res, next) {
   const currUser: ReqUserT = req.user;
   const { password, newPassword } = req.body;
@@ -148,7 +146,7 @@ export const changePassword = Async(async function (req, res, next) {
   res.status(201).json({ passwordIsChanged: true, accessToken });
 });
 
-// 3.0
+// 3.0 for users authenticated by the google
 export const demandSetPassword = Async(async function (req, res, next) {
   const currUser: ReqUserT = req.user;
   const { email } = req.body;
@@ -222,23 +220,4 @@ export const setPassword = Async(async function (req, res, next) {
   res.status(201).json({ passwordIsSet: true, accessToken });
 });
 
-export const refresh = Async(async function (req, res, next) {
-  const { authorization } = req.cookies;
-
-  if (!authorization) return next(new AppError(401, "you are not authorized"));
-
-  const verifiedToken = await JWT.verifyToken(authorization, true);
-
-  if (!verifiedToken) return next(new AppError(404, "user does not exists"));
-
-  const user = await User.findById(verifiedToken._id);
-
-  if (!user) return next(new AppError(404, "user does not exists"));
-
-  const { accessToken } = JWT.asignToken({
-    res,
-    payload: user,
-  });
-
-  res.status(201).json({ accessToken });
-});
+export const refreshToken = refresh(User);

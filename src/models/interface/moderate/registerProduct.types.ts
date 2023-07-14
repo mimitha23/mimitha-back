@@ -52,6 +52,10 @@ export interface RegisteredProductT {
   attachedProducts: number;
 
   developedProducts: Schema.Types.ObjectId[];
+
+  createdAt: Date;
+
+  updatedAt: Date;
 }
 
 export interface RegisteredProductMethodsT {}

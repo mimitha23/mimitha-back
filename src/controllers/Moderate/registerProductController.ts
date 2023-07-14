@@ -63,7 +63,7 @@ export const getRegisterProductFormSugestions = Async(async function (
 });
 
 export const getAllRegisteredProducts = Async(async function (req, res, next) {
-  const docs = await RegisteredProduct.find();
+  const docs = await RegisteredProduct.find().sort({ createdAt: -1 });
 
   res.status(200).json(docs);
 });

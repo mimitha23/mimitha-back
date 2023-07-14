@@ -6,12 +6,28 @@ const router = Router();
 
 router
   .route("/")
-  .get(productTypeController.getAllProductType)
-  .post(productTypeController.createProductType);
+  .get(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    productTypeController.getAllProductType
+  )
+  .post(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    productTypeController.createProductType
+  );
 
 router
   .route("/:typeId")
-  .put(productTypeController.updateProductType)
-  .delete(productTypeController.deleteProductType);
+  .put(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    productTypeController.updateProductType
+  )
+  .delete(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    productTypeController.deleteProductType
+  );
 
 export default router;

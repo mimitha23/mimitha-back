@@ -66,6 +66,6 @@ StaffSchema.methods.createPasswordResetToken =
     return resetToken || "";
   };
 
-const User = model<IStaff, StaffModelT>("Staff", StaffSchema);
+const Staff = model<IStaff, StaffModelT>("Staff", StaffSchema);
 
-export default User;
+export default Staff;

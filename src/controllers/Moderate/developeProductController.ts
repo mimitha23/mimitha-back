@@ -1,10 +1,11 @@
-import { Async, AppError, FileUplaod } from "../../lib";
 import {
   Color,
   Variant,
   DevelopedProduct,
   RegisteredProduct,
 } from "../../models";
+// import {SortOp} from "mongoose"
+import { Async, AppError, FileUplaod } from "../../lib";
 
 const fileUpload = new FileUplaod({
   storage: "memoryStorage",
@@ -60,7 +61,9 @@ export const getAllDevelopedProducts = Async(async function (req, res, next) {
 
   if (is_public === "1") query.isPublic = true;
 
-  const docs = await DevelopedProduct.find(query).select(fieldsToSelect);
+  const docs = await DevelopedProduct.find(query)
+    .select(fieldsToSelect)
+    .sort({ createdAt: -1 });
 
   res.status(200).json(docs);
 });
@@ -77,6 +80,31 @@ export const getDevelopedProduct = Async(async function (req, res, next) {
   if (!doc) return next(new AppError(400, "there ane no such product"));
 
   res.status(200).json(doc);
+});
+
+export const copyDevelopedProductConfig = Async(async function (
+  req,
+  res,
+  next
+) {
+  const { registeredProductId } = req.params;
+
+  const { createdAt, updatedAt }: any = req.query;
+
+  const sort: any = {};
+
+  if (createdAt) sort.createdAt = createdAt;
+  else if (updatedAt) sort.updatedAt = updatedAt;
+
+  const doc = await DevelopedProduct.find({ product: registeredProductId })
+    .sort(sort)
+    .limit(1)
+    .populate({ path: "variants" })
+    .select("description isPublic price size variants");
+
+  if (!doc[0]) return next(new AppError(400, "there ane no such product"));
+
+  res.status(200).json(doc[0]);
 });
 
 export const updateDevelopedProduct = Async(async function (req, res, next) {

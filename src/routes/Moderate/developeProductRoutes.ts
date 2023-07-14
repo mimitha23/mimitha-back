@@ -6,23 +6,43 @@ const router = Router();
 
 router
   .route("/suggestions")
-  .get(developeProductController.getDevelopeProductFormSugestions);
+  .get(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    developeProductController.getDevelopeProductFormSugestions
+  );
 
 router
   .route("/:registeredProductId/products")
   .get(developeProductController.getAllDevelopedProducts)
   .post(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
     developeProductController.uploadMedia("media"),
     developeProductController.attachDevelopedProduct
+  );
+
+router
+  .route("/:registeredProductId/products/copy")
+  .get(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    developeProductController.copyDevelopedProductConfig
   );
 
 router
   .route("/:registeredProductId/products/:productId")
   .get(developeProductController.getDevelopedProduct)
   .put(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
     developeProductController.uploadMedia("media"),
     developeProductController.updateDevelopedProduct
   )
-  .delete(developeProductController.deleteDevelopedProduct);
+  .delete(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    developeProductController.deleteDevelopedProduct
+  );
 
 export default router;

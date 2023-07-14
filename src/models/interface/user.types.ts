@@ -1,6 +1,6 @@
-import { Model } from "mongoose";
+import { Model, Document } from "mongoose";
 
-export interface IUser {
+export interface IUser extends Document {
   _id: string;
   fullname: string;
   username: string;
@@ -32,3 +32,7 @@ export interface USER_TO_CLIENT_T {
   email: IUser["email"];
   role: string;
 }
+
+type AvailableUserRolesT = IUser["role"][];
+
+export const USER_ROLES: AvailableUserRolesT = ["USER"];

@@ -6,12 +6,12 @@ const router = Router();
 
 router
   .route("/")
-  .get(colorController.getAllColor)
-  .post(colorController.createColor);
+  .get(checkAuth, restrictByRoles(["ADMIN"]), colorController.getAllColor)
+  .post(checkAuth, restrictByRoles(["ADMIN"]), colorController.createColor);
 
 router
   .route("/:colorId")
-  .put(colorController.updateColor)
-  .delete(colorController.deleteColor);
+  .put(checkAuth, restrictByRoles(["ADMIN"]), colorController.updateColor)
+  .delete(checkAuth, restrictByRoles(["ADMIN"]), colorController.deleteColor);
 
 export default router;

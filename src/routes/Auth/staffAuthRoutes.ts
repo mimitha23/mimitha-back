@@ -1,10 +1,18 @@
 import { Router } from "express";
-import { login, logout } from "../../controllers/Auth/staffAuthController";
-import { checkAuth } from "../../middlewares";
+import { staffAuthController } from "../../controllers/Auth/";
+import { checkAuth, restrictByRoles } from "../../middlewares";
 
 const router = Router();
 
-router.route("/login").post(login);
-router.route("/logout").post(logout);
+router.route("/login").post(staffAuthController.login);
+router
+  .route("/logout")
+  .post(
+    checkAuth,
+    restrictByRoles(["ADMIN", "MODERATOR"]),
+    staffAuthController.logoutStaff
+  );
+router.route("/create-admin").post(staffAuthController.createAdmin);
+router.route("/refresh").post(checkAuth, staffAuthController.refreshToken);
 
 export default router;

@@ -1,31 +1,40 @@
-import { Async, AppError } from "../lib";
-import { Model as MongooseModelT } from "mongoose";
+import { Async, AppError, JWT } from "../lib";
+import { Model as MongooseModelT, Document } from "mongoose";
+import { IStaff } from "../models/interface/staff.types";
+import { IUser } from "../models/interface/user.types";
 
-export const updateOne = (Model: typeof MongooseModelT) =>
+export const refresh = <T extends Document>(Model: MongooseModelT<T>) =>
   Async(async function (req, res, next) {
-    const { id } = req.params;
-    const body = req.body;
+    const { authorization } = req.cookies;
 
-    const doc = await Model.findByIdAndUpdate(
-      id,
-      {
-        $set: { ...body },
-      },
-      { new: true }
-    );
+    if (!authorization)
+      return next(new AppError(401, "you are not authorized"));
 
-    if (!doc) return next(new AppError(400, "there ane no such color"));
+    const verifiedToken = await JWT.verifyToken(authorization, true);
 
-    res.status(201).json(doc);
+    if (!verifiedToken) return next(new AppError(404, "user does not exists"));
+
+    const user: IStaff | IUser | null = await Model.findById(verifiedToken._id);
+
+    if (!user) return next(new AppError(404, "user does not exists"));
+
+    const userData = {
+      _id: user._id,
+      fullname: user?.fullname,
+      email: user.email,
+      role: user.role,
+    };
+
+    const { accessToken } = JWT.asignToken({
+      res,
+      payload: userData,
+    });
+
+    res.status(201).json({ accessToken });
   });
 
-export const deleteOne = (Model: typeof MongooseModelT) =>
+export const logout = () =>
   Async(async function (req, res, next) {
-    const { id } = req.params;
-
-    const doc = await Model.findByIdAndDelete(id);
-
-    if (!doc) return next(new AppError(400, "there ane no such color"));
-
-    res.status(204).json("color is deleted");
+    res.clearCookie("authorization");
+    res.end();
   });

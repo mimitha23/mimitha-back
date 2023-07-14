@@ -1,5 +1,6 @@
-import { Async, JWT, AppError, Email } from "../../lib";
 import { Staff } from "../../models";
+import { Async, JWT, AppError, Email } from "../../lib";
+import { refresh, logout } from "../handlerFactory";
 
 export const login = Async(async function (req, res, next) {
   const { email, password } = req.body;
@@ -28,7 +29,28 @@ export const login = Async(async function (req, res, next) {
   res.status(201).json({ accessToken, user: userData });
 });
 
-export const logout = Async(async function (req, res, next) {
-  res.clearCookie("authorization");
-  res.end();
+export const createAdmin = Async(async function (req, res, next) {
+  const body = req.body;
+
+  if (!body.fullname || !body.email || !body.password)
+    return next(
+      new AppError(403, "please enter your fullname, email and password")
+    );
+
+  const registeredAdmin = await Staff.findOne({ role: "ADMIN" });
+
+  if (registeredAdmin) return next(new AppError(400, "admin already exists"));
+
+  await Staff.create({
+    fullname: body.fullname,
+    email: body.email,
+    password: body.password,
+    role: "ADMIN",
+  });
+
+  res.status(201).json("admin is created");
 });
+
+export const logoutStaff = logout();
+
+export const refreshToken = refresh(Staff);

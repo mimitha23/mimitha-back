@@ -6,12 +6,16 @@ const router = Router();
 
 router
   .route("/")
-  .get(textureController.getAllTexture)
-  .post(textureController.createTexture);
+  .get(checkAuth, restrictByRoles(["ADMIN"]), textureController.getAllTexture)
+  .post(checkAuth, restrictByRoles(["ADMIN"]), textureController.createTexture);
 
 router
   .route("/:textureId")
-  .put(textureController.updateTexture)
-  .delete(textureController.deleteTexture);
+  .put(checkAuth, restrictByRoles(["ADMIN"]), textureController.updateTexture)
+  .delete(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    textureController.deleteTexture
+  );
 
 export default router;

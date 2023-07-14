@@ -1,6 +1,6 @@
-import { Model } from "mongoose";
+import { Model, Document } from "mongoose";
 
-export interface IStaff {
+export interface IStaff extends Document {
   _id: string;
   fullname: string;
   email: string;
@@ -21,3 +21,6 @@ export interface IStaffMethods {
 }
 
 export type StaffModelT = Model<IStaff, {}, IStaffMethods>;
+
+type AvailableStaffRolesT = IStaff["role"][];
+export const STAFF_ROLES: AvailableStaffRolesT = ["ADMIN", "MODERATOR"];

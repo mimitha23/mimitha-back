@@ -6,17 +6,34 @@ const router = Router();
 
 router
   .route("/")
-  .get(variantController.getAllVariant)
+  .get(checkAuth, restrictByRoles(["ADMIN"]), variantController.getAllVariant)
   .post(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
     variantController.uploadMedia("media"),
     variantController.createVariant
   );
 
 router
   .route("/:variantId")
-  .put(variantController.uploadMedia("media"), variantController.updateVariant)
-  .delete(variantController.deleteVariant);
+  .put(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    variantController.uploadMedia("media"),
+    variantController.updateVariant
+  )
+  .delete(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    variantController.deleteVariant
+  );
 
-router.route("/types").get(variantController.getExistingVariantTypes);
+router
+  .route("/types")
+  .get(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    variantController.getExistingVariantTypes
+  );
 
 export default router;

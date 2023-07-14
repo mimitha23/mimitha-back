@@ -1,6 +1,6 @@
-import { Model, Schema } from "mongoose";
+import { Model, Schema, Document } from "mongoose";
 
-export interface DevelopedProductT {
+export interface DevelopedProductT extends Document {
   product: Schema.Types.ObjectId;
   isPublic: boolean;
   title: {
@@ -30,6 +30,8 @@ export interface DevelopedProductT {
     en: string;
   };
   assets: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface DevelopedProductMethodT {}

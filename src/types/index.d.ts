@@ -4,8 +4,6 @@ interface ReqUserT {
   _id: string;
   email: string;
   role: string;
-  username?: string;
-  fullname?: string;
 }
 
 declare global {

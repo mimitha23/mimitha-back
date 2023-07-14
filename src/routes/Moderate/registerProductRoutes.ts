@@ -6,11 +6,17 @@ const router = Router();
 
 router
   .route("/form-sugestions")
-  .get(registerProductController.getRegisterProductFormSugestions);
+  .get(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    registerProductController.getRegisterProductFormSugestions
+  );
 
 router
   .route("/:productId")
   .put(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
     registerProductController.uploadMedia("media"),
     registerProductController.updateRegisteredProduct
   )
@@ -19,9 +25,15 @@ router
 router
   .route("/")
   .post(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
     registerProductController.uploadMedia("media"),
     registerProductController.registerProduct
   )
-  .get(registerProductController.getAllRegisteredProducts);
+  .get(
+    checkAuth,
+    restrictByRoles(["ADMIN"]),
+    registerProductController.getAllRegisteredProducts
+  );
 
 export default router;
