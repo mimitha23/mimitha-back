@@ -13,6 +13,6 @@ router
     staffAuthController.logoutStaff
   );
 router.route("/create-admin").post(staffAuthController.createAdmin);
-router.route("/refresh").post(checkAuth, staffAuthController.refreshToken);
+router.route("/refresh").post(staffAuthController.refreshToken);
 
 export default router;

@@ -36,6 +36,6 @@ router
   .route("/demand-password/:userId/:token")
   .post(checkAuth, restrictByRoles(["USER"]), userAuthController.setPassword);
 
-router.route("/refresh").post(checkAuth, userAuthController.refreshToken);
+router.route("/refresh").post(userAuthController.refreshToken);
 
 export default router;

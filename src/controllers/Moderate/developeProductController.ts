@@ -4,7 +4,6 @@ import {
   DevelopedProduct,
   RegisteredProduct,
 } from "../../models";
-// import {SortOp} from "mongoose"
 import { Async, AppError, FileUplaod } from "../../lib";
 
 const fileUpload = new FileUplaod({
@@ -43,29 +42,6 @@ export const attachDevelopedProduct = Async(async function (req, res, next) {
   });
 
   res.status(201).json("product is attached");
-});
-
-export const getAllDevelopedProducts = Async(async function (req, res, next) {
-  const { select, is_public } = req.query;
-
-  const full = "-__v";
-  const short = "title price color inStock assets rating soldOut";
-
-  let fieldsToSelect = "";
-
-  if (select === "short" || !select) fieldsToSelect = short;
-  else if (select === "full") fieldsToSelect = full;
-  else fieldsToSelect = select as string;
-
-  const query: { isPublic?: boolean } = {};
-
-  if (is_public === "1") query.isPublic = true;
-
-  const docs = await DevelopedProduct.find(query)
-    .select(fieldsToSelect)
-    .sort({ createdAt: -1 });
-
-  res.status(200).json(docs);
 });
 
 export const getDevelopedProduct = Async(async function (req, res, next) {

@@ -14,7 +14,6 @@ router
 
 router
   .route("/:registeredProductId/products")
-  .get(developeProductController.getAllDevelopedProducts)
   .post(
     checkAuth,
     restrictByRoles(["ADMIN"]),

@@ -20,6 +20,8 @@ import productTypeRoutes from "./routes/Moderate/productTypeRoutes";
 import productStylesRoutes from "./routes/Moderate/productStylesRoutes";
 import registerProductRoutes from "./routes/Moderate/registerProductRoutes";
 import developeProductRoutes from "./routes/Moderate/developeProductRoutes";
+import productRoutes from "./routes/productRoutes";
+import landingRoutes from "./routes/landingRoutes";
 
 const App = express();
 
@@ -75,6 +77,8 @@ App.use("/api/v1/moderate/product-type", productTypeRoutes);
 App.use("/api/v1/moderate/product-style", productStylesRoutes);
 App.use("/api/v1/moderate/register-product", registerProductRoutes);
 App.use("/api/v1/moderate/develope-product", developeProductRoutes);
+App.use("/api/v1/products", productRoutes);
+App.use("/api/v1/landing", landingRoutes);
 
 // Views
 App.get("/view", (req, res) => {

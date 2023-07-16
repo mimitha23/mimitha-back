@@ -25,18 +25,18 @@ export const login = Async(async function (req, res, next) {
   const { email, password } = req.body;
 
   if (!email || !password)
-    return next(new AppError(403, "please enter your email and password"));
+    return next(new AppError(401, "please enter your email and password"));
 
   const user = await User.findOne({ email, authByGoogle: false }).select(
     "+password"
   );
 
-  if (!user) return next(new AppError(403, "incorect email or password"));
+  if (!user) return next(new AppError(401, "incorect email or password"));
 
   const validPassword = await user.checkPassword(password, user.password);
 
   if (!validPassword)
-    return next(new AppError(403, "incorect email or password"));
+    return next(new AppError(401, "incorect email or password"));
 
   const userData = UserUtils.generateUserToClientData(user);
 
