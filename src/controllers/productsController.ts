@@ -12,21 +12,35 @@ export const getAllDevelopedProducts = Async(async function (req, res, next) {
   res.status(200).json(docs);
 });
 
-export const getAllDevelopedProductsByRegisteredProduct = Async(async function (
-  req,
-  res,
-  next
-) {
-  const { registeredProductId } = req.params;
+export const getActiveProduct = Async(async function (req, res, next) {
+  const { productId } = req.params;
 
-  const docs = await new API_Features(
-    DevelopedProduct.find({ product: registeredProductId }),
-    req.query
-  )
-    .filter()
-    .sort()
-    .selectFields({ isProduct: true })
-    .execute();
+  const doc = await DevelopedProduct.findById(productId)
+    .populate({
+      path: "product",
+      select: "-attachedProducts -createdAt -updatedAt -__v -thumbnail",
+      populate: {
+        path: "developedProducts",
+        select: "color",
+        match: { isPublic: true },
+      },
+    })
+    .select("-__v -isPublic -variants -createdAt -updatedAt");
+
+  if (!doc) return next(new AppError(400, "there ane no such product"));
+
+  res.status(200).json(doc);
+});
+
+export const searchProducts = Async(async function (req, res, next) {
+  const { locale, search } = req.query;
+
+  const titleLocale = `title.${locale || "en"}`;
+
+  const docs = await DevelopedProduct.find({
+    isPublic: true,
+    [titleLocale]: { $regex: search, $options: "i" },
+  });
 
   res.status(200).json(docs);
 });

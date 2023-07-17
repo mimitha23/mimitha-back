@@ -4,7 +4,7 @@ import {
   DevelopedProduct,
   RegisteredProduct,
 } from "../../models";
-import { Async, AppError, FileUplaod } from "../../lib";
+import { Async, AppError, FileUplaod, API_Features } from "../../lib";
 
 const fileUpload = new FileUplaod({
   storage: "memoryStorage",
@@ -56,6 +56,25 @@ export const getDevelopedProduct = Async(async function (req, res, next) {
   if (!doc) return next(new AppError(400, "there ane no such product"));
 
   res.status(200).json(doc);
+});
+
+export const getAllDevelopedProductsByRegisteredProduct = Async(async function (
+  req,
+  res,
+  next
+) {
+  const { registeredProductId } = req.params;
+
+  const docs = await new API_Features(
+    DevelopedProduct.find({ product: registeredProductId }),
+    req.query
+  )
+    .filter()
+    .sort()
+    .selectFields({ isProduct: true })
+    .execute();
+
+  res.status(200).json(docs);
 });
 
 export const copyDevelopedProductConfig = Async(async function (

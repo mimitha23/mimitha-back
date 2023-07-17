@@ -5,8 +5,8 @@ const router = Router();
 
 router.route("/developed").get(productsController.getAllDevelopedProducts);
 
-router
-  .route("/:registeredProductId/developed")
-  .get(productsController.getAllDevelopedProductsByRegisteredProduct);
+router.route("/search").get(productsController.searchProducts);
+
+router.route("/:productId").get(productsController.getActiveProduct);
 
 export default router;
