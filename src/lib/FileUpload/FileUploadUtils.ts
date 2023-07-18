@@ -1,5 +1,4 @@
-import { GenerateFileNameT } from "./fileupload";
-import { FileT } from "./fileupload";
+import { FileT, GenerateFileNameT } from "./fileUpload.types";
 
 const FileUploadUtils = (Base?: any) =>
   class extends Base {

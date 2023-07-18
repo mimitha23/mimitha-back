@@ -13,10 +13,9 @@ import {
   UpdateFileOnFirebaseT,
   UploadMultipleFilesOnFirebaseT,
   UpdateMultipleFilesOnFirebaseT,
-} from "./fileupload";
+} from "./fileUpload.types";
 import { firebaseFolders } from "../../config/config";
 import { uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { error } from "console";
 
 export default class FileUpload extends MulterConfig(
   SharpConfig(FileUploadUtils(FirebaseConfig))

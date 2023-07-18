@@ -6,10 +6,11 @@ import {
   Seasons,
   Gender,
   Texture,
+  Category,
 } from "../../models";
-import { Async, AppError, FileUplaod } from "../../lib";
+import { Async, AppError, FileUpload } from "../../lib";
 
-const fileUpload = new FileUplaod({
+const fileUpload = new FileUpload({
   storage: "memoryStorage",
   upload: "single",
 });
@@ -33,7 +34,7 @@ export const registerProduct = Async(async function (req, res, next) {
       folder: "products",
     });
   } catch (error) {
-    return next(new AppError(400, "occured error during upload thumbnail"));
+    return next(new AppError(400, "ocurred error during upload thumbnail"));
   }
 
   registeredProduct.thumbnail = downloadUrl;
@@ -42,7 +43,7 @@ export const registerProduct = Async(async function (req, res, next) {
   res.status(201).json("product is registered");
 });
 
-export const getRegisterProductFormSugestions = Async(async function (
+export const getRegisterProductFormSuggestions = Async(async function (
   req,
   res,
   next
@@ -57,9 +58,16 @@ export const getRegisterProductFormSugestions = Async(async function (
 
   const textures = await Texture.find().select("-__v");
 
-  res
-    .status(200)
-    .json({ productTypes, productStyles, seasons, gender, textures });
+  const categories = await Category.find().select("-__v");
+
+  res.status(200).json({
+    productTypes,
+    productStyles,
+    seasons,
+    gender,
+    textures,
+    categories,
+  });
 });
 
 export const getAllRegisteredProducts = Async(async function (req, res, next) {
@@ -83,7 +91,7 @@ export const updateRegisteredProduct = Async(async function (req, res, next) {
         downloadUrl: body.thumbnail,
       });
     } catch (error) {
-      return next(new AppError(400, "occured error during update thumbnail"));
+      return next(new AppError(400, "ocurred error during update thumbnail"));
     }
   }
 
@@ -127,7 +135,7 @@ export const deleteRegisteredProduct = Async(async function (req, res, next) {
     await fileUpload.deleteFileOnFirebase(doc.thumbnail);
     await fileUpload.deleteMultipleFilesOnFirebase(developedProductsAssets);
   } catch (error) {
-    return next(new AppError(400, "occured error during delete thumbnail"));
+    return next(new AppError(400, "ocurred error during delete thumbnail"));
   }
 
   res.status(204).json("product is deleted");

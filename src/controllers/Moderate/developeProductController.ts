@@ -4,9 +4,9 @@ import {
   DevelopedProduct,
   RegisteredProduct,
 } from "../../models";
-import { Async, AppError, FileUplaod, API_Features } from "../../lib";
+import { Async, AppError, FileUpload, API_Features } from "../../lib";
 
-const fileUpload = new FileUplaod({
+const fileUpload = new FileUpload({
   storage: "memoryStorage",
   upload: "any",
 });

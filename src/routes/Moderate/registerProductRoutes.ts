@@ -5,11 +5,11 @@ import { checkAuth, restrictByRoles } from "../../middlewares";
 const router = Router();
 
 router
-  .route("/form-sugestions")
+  .route("/form-suggestions")
   .get(
     checkAuth,
     restrictByRoles(["ADMIN"]),
-    registerProductController.getRegisterProductFormSugestions
+    registerProductController.getRegisterProductFormSuggestions
   );
 
 router

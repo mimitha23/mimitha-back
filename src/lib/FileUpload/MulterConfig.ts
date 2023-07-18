@@ -1,7 +1,7 @@
 import multer from "multer";
 import AppError from "../AppError";
 import { Request } from "express";
-import { MulterConfigT, CreateMulterDestionationT } from "./fileupload";
+import { MulterConfigT, CreateMulterDestionationT } from "./fileUpload.types";
 
 const MulterConfig = (Base?: any) =>
   class extends Base {

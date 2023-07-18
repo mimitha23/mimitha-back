@@ -1,9 +1,9 @@
-import sharp from "sharp";
 import {
   SharpWriteOnDisk,
   SharpEditAndWriteOnDiskT,
   FileT,
-} from "./fileupload";
+} from "./fileUpload.types";
+import sharp from "sharp";
 
 const SharpConfig = (Base?: any) =>
   class extends Base {

@@ -13,7 +13,8 @@ import userAuthRoutes from "./routes/Auth/userAuthRoutes";
 import staffAuthRoutes from "./routes/Auth/staffAuthRoutes";
 
 // Moderate
-import collorRoutes from "./routes/Moderate/collorRoutes";
+import moderateDefaultsRoutes from "./routes/Moderate/moderateDefaultsRoutes";
+import colorRoutes from "./routes/Moderate/colorRoutes";
 import variantRoutes from "./routes/Moderate/variantRoutes";
 import textureRoutes from "./routes/Moderate/textureRoutes";
 import productTypeRoutes from "./routes/Moderate/productTypeRoutes";
@@ -69,14 +70,17 @@ NODE_MODE === "DEV" && App.use(morgan("dev"));
 App.use("/api/v1/auth", userAuthRoutes);
 App.use("/api/v1/auth/staff", staffAuthRoutes);
 
-// Moderate
-App.use("/api/v1/moderate/color", collorRoutes);
+// Moderate -> Dashboard
+App.use("/api/v1/moderate/defaults", moderateDefaultsRoutes);
+App.use("/api/v1/moderate/color", colorRoutes);
 App.use("/api/v1/moderate/texture", textureRoutes);
 App.use("/api/v1/moderate/variant", variantRoutes);
 App.use("/api/v1/moderate/product-type", productTypeRoutes);
 App.use("/api/v1/moderate/product-style", productStylesRoutes);
 App.use("/api/v1/moderate/register-product", registerProductRoutes);
 App.use("/api/v1/moderate/develope-product", developeProductRoutes);
+
+// Client
 App.use("/api/v1/products", productRoutes);
 App.use("/api/v1/landing", landingRoutes);
 

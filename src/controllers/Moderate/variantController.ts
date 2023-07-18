@@ -1,7 +1,7 @@
-import { Async, AppError, FileUplaod } from "../../lib";
+import { Async, AppError, FileUpload } from "../../lib";
 import { Variant } from "../../models";
 
-const fileUpload = new FileUplaod({
+const fileUpload = new FileUpload({
   storage: "memoryStorage",
   upload: "single",
 });
