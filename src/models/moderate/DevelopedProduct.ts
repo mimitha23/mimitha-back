@@ -21,6 +21,11 @@ const DevelopedProductSchema = new Schema<
       default: false,
     },
 
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
+
     title: {
       ka: {
         type: String,

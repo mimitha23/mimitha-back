@@ -12,6 +12,13 @@ export interface RegisteredProductT {
     _id: string;
   };
 
+  category: {
+    ka: string;
+    en: string;
+    query: string;
+    _id: string;
+  };
+
   styles: [
     {
       ka: string;

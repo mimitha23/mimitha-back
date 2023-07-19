@@ -1,16 +1,22 @@
 import express from "express";
-import cors from "cors";
+
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import path from "path";
 
 import { AppError } from "./lib";
-import { APP_ORIGINS, NODE_MODE } from "./config/env";
+import { NODE_MODE } from "./config/env";
 import errorController from "./controllers/errorController";
+
+import { setHeaders, setCors } from "./middlewares";
 
 // Auth
 import userAuthRoutes from "./routes/Auth/userAuthRoutes";
 import staffAuthRoutes from "./routes/Auth/staffAuthRoutes";
+
+// Nav
+import navigationRoutes from "./routes/Navigation/navigationRoutes";
+import navigationRoutesRoutes from "./routes/Navigation/navigationRoutesRoutes";
 
 // Moderate
 import moderateDefaultsRoutes from "./routes/Moderate/moderateDefaultsRoutes";
@@ -34,34 +40,9 @@ App.set("views", path.join(__dirname, "/views"));
 
 App.use(cookieParser());
 
-App.use(function (req, res, next) {
-  res.header("Access-Control-Allow-credentials", "true");
-  res.header("Access-Control-Allow-Origin", req.headers.origin);
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Origin, Authorization"
-  );
+App.use(setHeaders);
 
-  if (req.method === "OPTIONS") res.sendStatus(200);
-  else next();
-});
-
-App.use(
-  cors({
-    credentials: true,
-    origin(requestOrigin, callback) {
-      const notAllowedOriginErrorMessage = `This site ${requestOrigin} does not have an access. Only specific domains are allowed to access it.`;
-
-      if (!requestOrigin) return callback(null, false);
-
-      if (!APP_ORIGINS.includes(requestOrigin))
-        return callback(new Error(notAllowedOriginErrorMessage), false);
-
-      return callback(null, true);
-    },
-  })
-);
+App.use(setCors());
 
 NODE_MODE === "DEV" && App.use(morgan("dev"));
 // ":data[web] :method :url :status :response-time-ms :total-time[digits] - :res[content-length]"
@@ -69,6 +50,10 @@ NODE_MODE === "DEV" && App.use(morgan("dev"));
 // Auth
 App.use("/api/v1/auth", userAuthRoutes);
 App.use("/api/v1/auth/staff", staffAuthRoutes);
+
+// NAV
+App.use("/api/v1/app/navigation", navigationRoutes);
+App.use("/api/v1/auth/navigation/routes", navigationRoutesRoutes);
 
 // Moderate -> Dashboard
 App.use("/api/v1/moderate/defaults", moderateDefaultsRoutes);
@@ -92,7 +77,7 @@ App.get("/view", (req, res) => {
   });
 });
 
-// Fetch unrecognised routes
+// Fetch unrecognized routes
 App.all("*", (req, _, next) => {
   next(new AppError(404, `can't find ${req.originalUrl} on this server`));
 });

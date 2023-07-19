@@ -28,6 +28,13 @@ const RegisteredProductSchema = new Schema<
       _id: { type: String, required: true },
     },
 
+    category: {
+      ka: { type: String, required: true },
+      en: { type: String, required: true },
+      query: { type: String, required: true },
+      _id: { type: String, required: true },
+    },
+
     styles: [
       {
         ka: { type: String, required: true },

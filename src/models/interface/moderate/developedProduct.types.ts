@@ -3,6 +3,7 @@ import { Model, Schema, Document } from "mongoose";
 export interface DevelopedProductT extends Document {
   product: Schema.Types.ObjectId;
   isPublic: boolean;
+  isFeatured: boolean;
   title: {
     ka: string;
     en: string;
