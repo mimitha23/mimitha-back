@@ -12,7 +12,6 @@ router
     restrictByRoles(["ADMIN", "MODERATOR"]),
     staffAuthController.logoutStaff
   );
-router.route("/create-admin").post(staffAuthController.createAdmin);
 router.route("/refresh").post(staffAuthController.refreshToken);
 
 export default router;

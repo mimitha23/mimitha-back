@@ -1,7 +1,46 @@
-import { Async } from "../../lib";
+import { Async, AppError } from "../../lib";
 import { NavRoutes, Nav } from "../../models";
 
-export const createNavRoute = Async(async function (req, res, next) {});
+export const createNavRoute = Async(async function (req, res, next) {
+  const body = req.body;
+
+  await NavRoutes.create(body);
+
+  res.status(201).json("route is created");
+});
+
+export const updateNavRoute = Async(async function (req, res, next) {
+  const { routeId } = req.params;
+  const body = req.body;
+
+  const doc = await NavRoutes.findByIdAndUpdate(
+    routeId,
+    {
+      $set: { ...body },
+    },
+    { new: true }
+  );
+
+  if (!doc) return next(new AppError(400, "there ane no such color"));
+
+  res.status(201).json("route is updated");
+});
+
+export const deleteNavRoute = Async(async function (req, res, next) {
+  const { routeId } = req.params;
+
+  const doc = await NavRoutes.findByIdAndDelete(routeId);
+
+  if (!doc) return next(new AppError(400, "there ane no such color"));
+
+  res.status(201).json("route is deleted");
+});
+
+export const getAllNavRoutes = Async(async function (req, res, next) {
+  const docs = await NavRoutes.find();
+
+  res.status(200).json(docs);
+});
 
 async function createRoutes() {
   const routes = [

@@ -10,6 +10,9 @@ import errorController from "./controllers/errorController";
 
 import { setHeaders, setCors } from "./middlewares";
 
+// Manuals
+import manualsRoutes from "./routes/manualsRoutes";
+
 // Auth
 import userAuthRoutes from "./routes/Auth/userAuthRoutes";
 import staffAuthRoutes from "./routes/Auth/staffAuthRoutes";
@@ -19,7 +22,6 @@ import navigationRoutes from "./routes/Navigation/navigationRoutes";
 import navigationRoutesRoutes from "./routes/Navigation/navigationRoutesRoutes";
 
 // Moderate
-import moderateDefaultsRoutes from "./routes/Moderate/moderateDefaultsRoutes";
 import colorRoutes from "./routes/Moderate/colorRoutes";
 import variantRoutes from "./routes/Moderate/variantRoutes";
 import textureRoutes from "./routes/Moderate/textureRoutes";
@@ -47,16 +49,18 @@ App.use(setCors());
 NODE_MODE === "DEV" && App.use(morgan("dev"));
 // ":data[web] :method :url :status :response-time-ms :total-time[digits] - :res[content-length]"
 
+// Manuals
+App.use("/api/v1/manuals", manualsRoutes);
+
 // Auth
 App.use("/api/v1/auth", userAuthRoutes);
 App.use("/api/v1/auth/staff", staffAuthRoutes);
 
 // NAV
-App.use("/api/v1/app/navigation", navigationRoutes);
-App.use("/api/v1/auth/navigation/routes", navigationRoutesRoutes);
+App.use("/api/v1/app/navigation/client", navigationRoutes);
+App.use("/api/v1/app/navigation/routes", navigationRoutesRoutes);
 
 // Moderate -> Dashboard
-App.use("/api/v1/moderate/defaults", moderateDefaultsRoutes);
 App.use("/api/v1/moderate/color", colorRoutes);
 App.use("/api/v1/moderate/texture", textureRoutes);
 App.use("/api/v1/moderate/variant", variantRoutes);

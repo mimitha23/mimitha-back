@@ -1,7 +1,29 @@
-import { Async } from "../../lib";
-import { Seasons, Category, Gender } from "../../models";
+import { Staff, Seasons, Gender, Category } from "../models";
+import { Async, AppError } from "../lib";
 
-export const createDBDefaults = Async(async function (req, res, next) {
+export const createAdmin = Async(async function (req, res, next) {
+  const body = req.body;
+
+  if (!body.fullname || !body.email || !body.password)
+    return next(
+      new AppError(403, "please enter your fullname, email and password")
+    );
+
+  const registeredAdmin = await Staff.findOne({ role: "ADMIN" });
+
+  if (registeredAdmin) return next(new AppError(400, "admin already exists"));
+
+  await Staff.create({
+    fullname: body.fullname,
+    email: body.email,
+    password: body.password,
+    role: "ADMIN",
+  });
+
+  res.status(201).json("admin is created");
+});
+
+export const createModerateDefaults = Async(async function (req, res, next) {
   const seasons = [
     {
       ka: "გაზაფხული",
@@ -82,3 +104,5 @@ export const createDBDefaults = Async(async function (req, res, next) {
 
   res.status(201).json("defaults are created");
 });
+
+export const createNavDefaults = Async(async function (req, res, next) {});
