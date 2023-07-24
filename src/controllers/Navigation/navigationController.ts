@@ -8,7 +8,7 @@ export const getNavigation = Async(async function (req, res, next) {
 
   if (
     category &&
-    ["men", "female", "adult", "family"].includes(category as string)
+    ["men", "women", "adult", "family"].includes(category as string)
   )
     queryObj.category = category;
 

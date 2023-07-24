@@ -2,12 +2,23 @@ import { DevelopedProduct } from "../models";
 import { Async, AppError, API_Features } from "../lib";
 
 export const getAllDevelopedProducts = Async(async function (req, res, next) {
-  const docs = await new API_Features(DevelopedProduct.find(), req.query)
-    .filter()
-    .sort()
-    .pagination()
-    .selectFields({ isProduct: true })
-    .execute();
+  const api_features = new API_Features();
+  const agregationQuery = api_features.generateAgregationQuery(req.query);
+
+  const docs = await DevelopedProduct.aggregate([
+    {
+      $lookup: {
+        from: "registeredproducts",
+        localField: "product",
+        foreignField: "_id",
+        as: "product",
+      },
+    },
+    {
+      $unwind: "$product",
+    },
+    ...agregationQuery,
+  ]);
 
   res.status(200).json(docs);
 });
@@ -43,4 +54,69 @@ export const searchProducts = Async(async function (req, res, next) {
   });
 
   res.status(200).json(docs);
+});
+
+export const getProductsFilter = Async(async function (req, res, next) {
+  const { category, productType } = req.query;
+
+  const queryToExecute: any = {};
+
+  if (category) {
+    queryToExecute["product.category.query"] = category;
+  }
+
+  if (productType) {
+    queryToExecute["product.productType.query"] = productType;
+  }
+
+  const filter = await DevelopedProduct.aggregate([
+    {
+      $lookup: {
+        from: "registeredproducts",
+        localField: "product",
+        foreignField: "_id",
+        as: "product",
+      },
+    },
+
+    {
+      $unwind: "$product",
+    },
+
+    { $match: { ...queryToExecute } },
+
+    {
+      $project: {
+        "product.seasons": 1,
+        "product.textures": 1,
+        "product.styles": 1,
+        "product.category": 1,
+        "product.productType": 1,
+      },
+    },
+
+    {
+      $unwind: "$product.styles",
+    },
+
+    {
+      $unwind: "$product.seasons",
+    },
+
+    {
+      $unwind: "$product.textures",
+    },
+
+    {
+      $group: {
+        _id: null,
+        styles: { $addToSet: "$product.styles" },
+        textures: { $addToSet: "$product.textures" },
+        seasons: { $addToSet: "$product.seasons" },
+        productTypes: { $addToSet: "$product.productType" },
+      },
+    },
+  ]);
+
+  res.status(200).json(filter);
 });

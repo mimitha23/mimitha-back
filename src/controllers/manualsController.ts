@@ -66,7 +66,7 @@ export const createModerateDefaults = Async(async function (req, res, next) {
     {
       ka: "ქალბატონი",
       en: "female",
-      query: "female",
+      query: "women",
     },
     {
       ka: "უნისექსი",
@@ -86,8 +86,8 @@ export const createModerateDefaults = Async(async function (req, res, next) {
   );
 
   const categories = [
-    { ka: "მამაკაცი", en: "male", query: "male" },
-    { ka: "ქალბატონი", en: "female", query: "female" },
+    { ka: "მამაკაცი", en: "men", query: "men" },
+    { ka: "ქალბატონი", en: "women", query: "women" },
     { ka: "საოჯახო", en: "family", query: "family" },
     { ka: "მოზარდი", en: "adult", query: "adult" },
   ];

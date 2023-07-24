@@ -21,7 +21,7 @@ const NavSchema = new Schema({
       routes: [
         {
           type: Schema.Types.ObjectId,
-          ref: "NavRoutes",
+          ref: "ProductType",
         },
       ],
     },

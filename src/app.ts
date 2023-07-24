@@ -19,7 +19,6 @@ import staffAuthRoutes from "./routes/Auth/staffAuthRoutes";
 
 // Nav
 import navigationRoutes from "./routes/Navigation/navigationRoutes";
-import navigationRoutesRoutes from "./routes/Navigation/navigationRoutesRoutes";
 
 // Moderate
 import colorRoutes from "./routes/Moderate/colorRoutes";
@@ -58,7 +57,6 @@ App.use("/api/v1/auth/staff", staffAuthRoutes);
 
 // NAV
 App.use("/api/v1/app/navigation/client", navigationRoutes);
-App.use("/api/v1/app/navigation/routes", navigationRoutesRoutes);
 
 // Moderate -> Dashboard
 App.use("/api/v1/moderate/color", colorRoutes);

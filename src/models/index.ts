@@ -3,7 +3,6 @@ export { default as User } from "./User";
 
 // app
 export { default as Nav } from "./nav/Nav";
-export { default as NavRoutes } from "./nav/NavRoutes";
 
 // moderate
 export { default as Color } from "./moderate/Color";
