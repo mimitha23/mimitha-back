@@ -137,7 +137,9 @@ class API_Features {
     }
 
     if (query.styles) {
-      queryToExecute["product.styles.query"] = query.styles;
+      queryToExecute["product.styles.query"] = {
+        $in: query.styles?.split(","),
+      };
     }
 
     if (query.seasons) {

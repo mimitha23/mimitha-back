@@ -69,7 +69,7 @@ export const getProductsFilter = Async(async function (req, res, next) {
     queryToExecute["product.productType.query"] = productType;
   }
 
-  const filter = await DevelopedProduct.aggregate([
+  const filterAgregation = await DevelopedProduct.aggregate([
     {
       $lookup: {
         from: "registeredproducts",
@@ -117,6 +117,35 @@ export const getProductsFilter = Async(async function (req, res, next) {
       },
     },
   ]);
+
+  const filter: any = {
+    styles: filterAgregation[0]?.styles || [],
+    textures: filterAgregation[0]?.textures || [],
+    seasons: filterAgregation[0]?.seasons || [],
+    productTypes: filterAgregation[0]?.productTypes || [],
+    sort: [
+      {
+        ka: "უახლესი",
+        en: "New In",
+        query: "-createdAd",
+      },
+      {
+        ka: "ყველაზე პოპულარული",
+        en: "The Most Popular",
+        query: "-soldOut,-rating",
+      },
+      {
+        ka: "ფასი ზრდადი",
+        en: "Price Ascending",
+        query: "price",
+      },
+      {
+        ka: "ფასი კლებადი",
+        en: "Price Descending",
+        query: "-price",
+      },
+    ],
+  };
 
   res.status(200).json(filter);
 });
