@@ -30,7 +30,7 @@ export const attachDevelopedProduct = Async(async function (req, res, next) {
       contentType: "image/webp",
     });
   } catch (error: any) {
-    return next(new AppError(400, "occured error during upload assets"));
+    return next(new AppError(400, "occurred error during upload assets"));
   }
 
   doc.assets = downloadUrls;
@@ -65,13 +65,13 @@ export const getAllDevelopedProductsByRegisteredProduct = Async(async function (
 ) {
   const { registeredProductId } = req.params;
 
-  const docs = await new API_Features(
-    DevelopedProduct.find({ product: registeredProductId }),
-    req.query
-  )
+  const docs = await new API_Features({
+    doc: DevelopedProduct.find({ product: registeredProductId }),
+    query: req.query,
+  })
     .filter()
     .sort()
-    .selectFields({ isProduct: true })
+    .selectFields()
     .execute();
 
   res.status(200).json(docs);
@@ -137,7 +137,10 @@ export const updateDevelopedProduct = Async(async function (req, res, next) {
       });
     } catch (error: any) {
       return next(
-        new AppError(400, error.message || "occured error during update assets")
+        new AppError(
+          400,
+          error.message || "occurred error during update assets"
+        )
       );
     }
     // if there are no new files but are removed files, delete them
@@ -146,7 +149,7 @@ export const updateDevelopedProduct = Async(async function (req, res, next) {
       await fileUpload.deleteMultipleFilesOnFirebase(body.filesToDelete);
     } catch (error) {
       return next(
-        new AppError(400, "occured error during delete removed files")
+        new AppError(400, "occurred error during delete removed files")
       );
     }
   }
@@ -170,7 +173,7 @@ export const deleteDevelopedProduct = Async(async function (req, res, next) {
   try {
     await fileUpload.deleteMultipleFilesOnFirebase(doc.assets);
   } catch (error) {
-    return next(new AppError(400, "occured error during delete thumbnail"));
+    return next(new AppError(400, "occurred error during delete thumbnail"));
   }
 
   await RegisteredProduct.findByIdAndUpdate(doc.product, {

@@ -2,21 +2,31 @@ class API_Features {
   doc;
   query;
   agregationQuery: any[] = [];
+  docType;
 
-  constructor(doc?: any, query?: any) {
+  constructor({
+    doc,
+    query,
+    docType = "PRODUCT",
+  }: {
+    doc?: any;
+    query: any;
+    docType?: "PRODUCT";
+  }) {
     this.doc = doc;
     this.query = query;
+    this.docType = docType;
   }
 
   ///////////////////////
   // for 'find' query //
   //////////////////////
-  selectFields({ isProduct = false }: { isProduct?: boolean }) {
-    const fieldsToSelect = this.generateSelectFieldsObjects({
-      isProduct,
+  selectFields() {
+    const fieldsToSelect = this.generateSelectFields({
       asString: true,
       select: this.query.select,
     });
+
     this.doc = this.doc.select(fieldsToSelect);
 
     return this;
@@ -50,31 +60,14 @@ class API_Features {
     else return { count: NaN, isRequested: true };
   }
 
-  async execute(): Promise<any[]> {
-    try {
-      return await this.doc;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   filter() {
-    const simpleKeys = ["createdAt"];
+    const queryToExecute: any = {};
 
-    const queryKeys = Object.keys(this.query);
-
-    let queryToModify: any = {};
-
-    queryKeys
-      .filter((key) => simpleKeys.includes(key))
-      .map((key) => (queryToModify[key] = this.query[key]));
-
-    // filter by isPublic
-    if (this.query.isPublic)
-      queryToModify.isPublic = this.query.isPublic === "1" ? true : false;
+    if (this.docType === "PRODUCT")
+      this.filterProduct({ query: this.query, queryToExecute });
 
     const finalQuery = JSON.parse(
-      JSON.stringify(queryToModify).replace(
+      JSON.stringify(queryToExecute).replace(
         /gt|gte|lt|lte|regex/g,
         (match) => `$${match}`
       )
@@ -83,6 +76,15 @@ class API_Features {
     this.doc = this.doc.find(finalQuery);
 
     return this;
+  }
+
+  async execute(): Promise<any> {
+    try {
+      await this.doc;
+      return this;
+    } catch (error) {
+      throw error;
+    }
   }
 
   //////////////////////////
@@ -96,10 +98,9 @@ class API_Features {
 
   selectAgregationField(select: any) {
     this.agregationQuery.push({
-      $project: this.generateSelectFieldsObjects({
-        isProduct: true,
-        asString: false,
+      $project: this.generateSelectFields({
         select,
+        asString: false,
       }),
     });
   }
@@ -118,11 +119,46 @@ class API_Features {
   }
 
   filterAgregation(query: any) {
-    const filterableKeys = ["isPublic", "category", "productType", "title"];
+    const queryToExecute: any = {};
+
+    if (this.docType === "PRODUCT")
+      this.filterProduct({ query, queryToExecute });
+
+    this.agregationQuery.push({
+      $match: queryToExecute,
+    });
+  }
+
+  generateAgregationQuery() {
+    const { page, limit, sort, select }: any = this.query;
+
+    this.filterAgregation(this.query);
+    sort && this.sortAgregation(sort);
+    select && this.selectAgregationField(select);
+    page && limit && this.paginateAgregation(page, limit);
+
+    return this.agregationQuery;
+  }
+
+  // PRODUCT
+  filterProduct({
+    query,
+    queryToExecute,
+  }: {
+    query: any;
+    queryToExecute: any;
+  }) {
+    const filterableKeys = [
+      "isPublic",
+      "category",
+      "productType",
+      "styles",
+      "seasons",
+      "title",
+      "textures",
+    ];
 
     if (!Object.keys(query).some((key) => filterableKeys.includes(key))) return;
-
-    const queryToExecute: any = {};
 
     if (query.isPublic) {
       queryToExecute.isPublic = query.isPublic === "1" ? true : false;
@@ -175,21 +211,55 @@ class API_Features {
         },
       ];
     }
-
-    this.agregationQuery.push({
-      $match: queryToExecute,
-    });
   }
 
-  generateAgregationQuery(query: any) {
-    const { page, limit, sort, select }: any = query;
+  selectProductFields({
+    asString,
+    select,
+  }: {
+    asString: boolean;
+    select: any;
+  }) {
+    let fieldsToSelectStr = "";
+    const fieldsToSelectObj: any = {};
 
-    this.filterAgregation(query);
-    sort && this.sortAgregation(sort);
-    select && this.selectAgregationField(select);
-    page && limit && this.paginateAgregation(page, limit);
+    const short = "title price color inStock assets rating soldOut";
 
-    return this.agregationQuery;
+    const registeredProductKeys = [
+      "category",
+      "productType",
+      "seasons",
+      "textures",
+      "styles",
+      "isEditable",
+    ];
+
+    select &&
+      select.split(" ").forEach((key: string) => {
+        const configuredKey = key.replace("-", "");
+
+        const isRegisteredProductKey =
+          registeredProductKeys.includes(configuredKey);
+
+        if (asString) {
+          if (select === "short" || !select) fieldsToSelectStr = short;
+          else
+            fieldsToSelectStr += isRegisteredProductKey
+              ? `${key.startsWith("-") ? "-" : ""}product.${configuredKey} `
+              : `${key} `;
+        } else {
+          if (select === "short" || !select)
+            short.split(" ").forEach((key) => (fieldsToSelectObj[key] = 1));
+          else
+            fieldsToSelectObj[
+              isRegisteredProductKey
+                ? `product.${configuredKey}`
+                : configuredKey
+            ] = key.startsWith("-") ? -1 : 1;
+        }
+      });
+
+    return asString ? fieldsToSelectStr : fieldsToSelectObj;
   }
 
   // helpers
@@ -210,59 +280,28 @@ class API_Features {
     return sortObject;
   }
 
-  generateSelectFieldsObjects({
+  generateSelectFields({
     select,
     asString = true,
-    isProduct,
   }: {
     select: any;
     asString?: boolean;
-    isProduct: boolean;
   }) {
     const selectTemp = select
       ?.split(",")
       ?.map((fragment: string) => fragment.trim())
       ?.join(" ");
 
-    let fieldsToSelectStr = "";
-    const fieldsToSelectObj: any = {};
+    let query;
 
-    const full = "-__v";
-    const short = "title price color inStock assets rating soldOut";
-
-    if (isProduct && (select === "full" || select === "short")) {
-      if (asString) {
-        if (select === "short" || !select) fieldsToSelectStr = short;
-        else if (select === "full") fieldsToSelectStr = full;
-      } else {
-        if (select === "short")
-          short.split(" ").forEach((key) => (fieldsToSelectObj[key] = 1));
-        else if (select === "full")
-          full.split(" ").forEach((key) => (fieldsToSelectObj[key] = -1));
-      }
-    } else {
-      if (asString) fieldsToSelectStr = selectTemp as string;
-      else
-        selectTemp.split(" ").forEach((key: string) => {
-          const configuredKey = key.replace("-", "");
-
-          const registeredProductKeys = [
-            "category",
-            "productType",
-            "seasons",
-            "textures",
-            "styles",
-          ];
-          const isRegisteredProductKey =
-            registeredProductKeys.includes(configuredKey);
-
-          fieldsToSelectObj[
-            isRegisteredProductKey ? `product.${configuredKey}` : configuredKey
-          ] = key.startsWith("-") ? -1 : 1;
-        });
+    if (this.docType === "PRODUCT") {
+      query = this.selectProductFields({
+        asString,
+        select: selectTemp,
+      });
     }
 
-    return asString ? fieldsToSelectStr : fieldsToSelectObj;
+    return query;
   }
 }
 
