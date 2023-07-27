@@ -169,7 +169,9 @@ class API_Features {
     }
 
     if (query.productType) {
-      queryToExecute["product.productType.query"] = query.productType;
+      queryToExecute["product.productType.query"] = {
+        $in: query.productType.split(","),
+      };
     }
 
     if (query.styles) {
