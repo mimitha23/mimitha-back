@@ -3,7 +3,7 @@ import {
   RegisteredProductT,
   RegisteredProductMethodsT,
   RegisteredProductModelT,
-} from "../interface/moderate/registerProduct.types";
+} from "../interface/products/registerProduct.types";
 
 const RegisteredProductSchema = new Schema<
   RegisteredProductT,

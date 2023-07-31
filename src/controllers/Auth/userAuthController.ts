@@ -16,7 +16,10 @@ export const register = Async(async function (req, res, next) {
 
   const userData = UserUtils.generateUserToClientData(user);
 
-  const { accessToken } = JWT.asignToken({ payload: userData, res });
+  const { accessToken } = JWT.asignToken({
+    payload: { ...userData, role: user.role },
+    res,
+  });
 
   res.status(201).json({ accessToken, user: userData });
 });
@@ -31,16 +34,19 @@ export const login = Async(async function (req, res, next) {
     "+password"
   );
 
-  if (!user) return next(new AppError(401, "incorect email or password"));
+  if (!user) return next(new AppError(401, "incorrect email or password"));
 
   const validPassword = await user.checkPassword(password, user.password);
 
   if (!validPassword)
-    return next(new AppError(401, "incorect email or password"));
+    return next(new AppError(401, "incorrect email or password"));
 
   const userData = UserUtils.generateUserToClientData(user);
 
-  const { accessToken } = JWT.asignToken({ payload: userData, res });
+  const { accessToken } = JWT.asignToken({
+    payload: { ...userData, role: user.role },
+    res,
+  });
 
   res.status(201).json({ accessToken, user: userData });
 });
@@ -68,7 +74,10 @@ export const googleLogin = Async(async function (req, res, next) {
 
   const userData = UserUtils.generateUserToClientData(user);
 
-  const { accessToken } = JWT.asignToken({ payload: userData, res });
+  const { accessToken } = JWT.asignToken({
+    payload: { ...userData, role: user.role },
+    res,
+  });
 
   res.status(201).json({ accessToken, user: userData });
 });

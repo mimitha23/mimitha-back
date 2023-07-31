@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
 import { Schema, model } from "mongoose";
-import UserUtils from "../utils/UserUtils/UserUtils";
-import { IUser, IUserMethods, UserModelT } from "./interface/user.types";
+import UserUtils from "../../utils/UserUtils/UserUtils";
+import { IUser, IUserMethods, UserModelT } from "../interface/user/user.types";
+import { USER_DEFAULT_AVATAR } from "../../config/config";
 
 const UserSchema = new Schema<IUser, UserModelT, IUserMethods>(
   {
@@ -13,7 +14,7 @@ const UserSchema = new Schema<IUser, UserModelT, IUserMethods>(
 
     fullname: {
       type: String,
-      required: true,
+      // required: true,
     },
 
     username: {
@@ -28,10 +29,21 @@ const UserSchema = new Schema<IUser, UserModelT, IUserMethods>(
       required: true,
     },
 
+    profilePicture: {
+      type: String,
+    },
+
     authByGoogle: {
       type: Boolean,
       default: false,
     },
+
+    favorites: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "DevelopedProduct",
+      },
+    ],
 
     password: {
       type: String,
@@ -51,6 +63,12 @@ const UserSchema = new Schema<IUser, UserModelT, IUserMethods>(
   },
   { timestamps: true }
 );
+
+UserSchema.pre("save", async function (next) {
+  if (this.profilePicture) return next();
+  this.profilePicture = USER_DEFAULT_AVATAR;
+  next();
+});
 
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

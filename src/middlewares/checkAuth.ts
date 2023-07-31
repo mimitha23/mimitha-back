@@ -2,7 +2,7 @@ import { ReqUserT } from "../types";
 import { User, Staff } from "../models";
 import { Async, AppError, JWT } from "../lib";
 import { STAFF_ROLES, IStaff } from "../models/interface/staff.types";
-import { USER_ROLES, IUser } from "../models/interface/user.types";
+import { USER_ROLES, IUser } from "../models/interface/user/user.types";
 
 const checkAuth = Async(async function (req, _, next) {
   const authorizationHeader = req.headers.authorization;

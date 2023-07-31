@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerProductController } from "../../controllers/Moderate";
+import { registerProductController } from "../../controllers/Products";
 import { checkAuth, restrictByRoles } from "../../middlewares";
 
 const router = Router();

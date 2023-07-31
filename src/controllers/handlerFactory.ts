@@ -1,7 +1,7 @@
 import { Async, AppError, JWT } from "../lib";
 import { Model as MongooseModelT, Document } from "mongoose";
 import { IStaff } from "../models/interface/staff.types";
-import { IUser } from "../models/interface/user.types";
+import { IUser } from "../models/interface/user/user.types";
 
 export const refresh = <T extends Document>(Model: MongooseModelT<T>) =>
   Async(async function (req, res, next) {

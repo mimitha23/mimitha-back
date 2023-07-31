@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2016",
+    "target": "ESNext",
     "module": "CommonJS",
     "rootDir": "./src",
     "outDir": "./build",
@@ -10,6 +10,6 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "src/commands/fn.mjs"],
+  "include": ["src/**/*.ts", "src/**/*.js", "src/commands/fn.mjs", "public"],
   "exclude": ["node_modules"]
 }

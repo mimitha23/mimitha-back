@@ -20,15 +20,21 @@ import staffAuthRoutes from "./routes/Auth/staffAuthRoutes";
 // Nav
 import navigationRoutes from "./routes/Navigation/navigationRoutes";
 
+// Products
+import registerProductRoutes from "./routes/Products/registerProductRoutes";
+import developeProductRoutes from "./routes/Products/developeProductRoutes";
+import productRoutes from "./routes/Products/productRoutes";
+
+// User
+import userFavoritesRoutes from "./routes/User/userFavoritesRoutes";
+import userListsRoutes from "./routes/User/userListsRoutes";
+
 // Moderate
 import colorRoutes from "./routes/Moderate/colorRoutes";
 import variantRoutes from "./routes/Moderate/variantRoutes";
 import textureRoutes from "./routes/Moderate/textureRoutes";
 import productTypeRoutes from "./routes/Moderate/productTypeRoutes";
 import productStylesRoutes from "./routes/Moderate/productStylesRoutes";
-import registerProductRoutes from "./routes/Moderate/registerProductRoutes";
-import developeProductRoutes from "./routes/Moderate/developeProductRoutes";
-import productRoutes from "./routes/productRoutes";
 import landingRoutes from "./routes/landingRoutes";
 
 const App = express();
@@ -57,6 +63,10 @@ App.use("/api/v1/auth/staff", staffAuthRoutes);
 
 // NAV
 App.use("/api/v1/app/navigation/client", navigationRoutes);
+
+// Products
+App.use("/api/v1/user/lists", userListsRoutes);
+App.use("/api/v1/user/favorites", userFavoritesRoutes);
 
 // Moderate -> Dashboard
 App.use("/api/v1/moderate/color", colorRoutes);

@@ -2,7 +2,7 @@ import {
   DevelopedProductT,
   DevelopedProductModelT,
   DevelopedProductMethodT,
-} from "../interface/moderate/developedProduct.types";
+} from "../interface/products/developedProduct.types";
 import { Schema, model } from "mongoose";
 
 const DevelopedProductSchema = new Schema<

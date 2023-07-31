@@ -1,5 +1,5 @@
-import { DevelopedProduct } from "../models";
-import { Async, AppError, API_Features } from "../lib";
+import { DevelopedProduct } from "../../models";
+import { Async, AppError, API_Features } from "../../lib";
 import mongoose from "mongoose";
 
 export const getAllDevelopedProducts = Async(async function (req, res, next) {

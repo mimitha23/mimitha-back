@@ -2,7 +2,7 @@ import {
   IUser,
   USER_TO_CLIENT_T,
   USER_WHITE_LIST,
-} from "../../models/interface/user.types";
+} from "../../models/interface/user/user.types";
 import crypto from "crypto";
 
 class UserUtils {
@@ -12,7 +12,7 @@ class UserUtils {
       email: "",
       fullname: "",
       username: "",
-      role: "",
+      profilePicture: "",
     };
 
     USER_WHITE_LIST.forEach((key) => {
