@@ -61,7 +61,19 @@ export const getAllFromList = Async(async function (req, res, next) {
   const docs = await UserList.findOne({
     user: currUser._id,
     _id: listId,
-  }).populate({ path: "products" });
+  }).populate({
+    path: "products",
+    select: "product title price assets soldOut size color",
+    populate: { path: "product", select: "category productType isEditable" },
+  });
 
   res.status(200).json(docs);
+});
+
+export const deleteList = Async(async function (req, res, next) {
+  const { listId } = req.params;
+
+  await UserList.findByIdAndDelete(listId);
+
+  res.status(204).json("list is deleted");
 });

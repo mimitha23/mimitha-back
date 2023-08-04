@@ -29,10 +29,15 @@ export const getAllFavorites = Async(async function (req, res, next) {
 
   let querySelect = "";
   if (select === "short") querySelect = "_id";
+  else querySelect = "product title price assets soldOut size color";
 
   const docs = await User.findById(currUser._id)
     .select("favorites")
-    .populate({ path: "favorites", select: querySelect });
+    .populate({
+      path: "favorites",
+      select: querySelect,
+      populate: { path: "product", select: "category productType isEditable" },
+    });
 
   if (!docs) return next(new AppError(404, "there are no such user"));
 

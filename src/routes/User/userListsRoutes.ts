@@ -11,11 +11,8 @@ router
 
 router
   .route("/:listId")
-  .get(
-    checkAuth,
-    restrictByRoles(["USER"]),
-    userListsController.getAllFromList
-  );
+  .get(checkAuth, restrictByRoles(["USER"]), userListsController.getAllFromList)
+  .delete(checkAuth, restrictByRoles(["USER"]), userListsController.deleteList);
 
 router
   .route("/:listId/:productId")
