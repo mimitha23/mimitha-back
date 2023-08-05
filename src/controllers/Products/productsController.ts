@@ -95,6 +95,7 @@ export const getProductsFilter = Async(async function (req, res, next) {
         "product.styles": 1,
         "product.category": 1,
         "product.productType": 1,
+        "product.gender": 1,
       },
     },
 
@@ -117,6 +118,7 @@ export const getProductsFilter = Async(async function (req, res, next) {
         textures: { $addToSet: "$product.textures" },
         seasons: { $addToSet: "$product.seasons" },
         productTypes: { $addToSet: "$product.productType" },
+        gender: { $addToSet: "$product.gender" },
       },
     },
   ]);
@@ -126,6 +128,7 @@ export const getProductsFilter = Async(async function (req, res, next) {
     textures: filterAgregation[0]?.textures || [],
     seasons: filterAgregation[0]?.seasons || [],
     productTypes: filterAgregation[0]?.productTypes || [],
+    gender: filterAgregation[0]?.gender || [],
     sort: [
       {
         ka: "უახლესი",

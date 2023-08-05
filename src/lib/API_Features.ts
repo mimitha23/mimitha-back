@@ -156,12 +156,24 @@ class API_Features {
       "seasons",
       "title",
       "textures",
+      "gender",
+      "sale",
     ];
 
     if (!Object.keys(query).some((key) => filterableKeys.includes(key))) return;
 
     if (query.isPublic) {
       queryToExecute.isPublic = query.isPublic === "1" ? true : false;
+    }
+
+    if (query.sale) {
+      queryToExecute["sale"] = true;
+    }
+
+    if (query.gender) {
+      queryToExecute["product.gender.query"] = {
+        $in: query.gender.split(","),
+      };
     }
 
     if (query.category) {
