@@ -56,7 +56,7 @@ export const login = Async(async function (req, res, next) {
 });
 
 export const googleLogin = Async(async function (req, res, next) {
-  const { email, username } = req.body;
+  const { email, username, fullname, profilePicture } = req.body;
 
   if (!email || !username)
     return next(new AppError(403, "please provide us valid credentials"));
@@ -66,8 +66,9 @@ export const googleLogin = Async(async function (req, res, next) {
   if (!user) {
     user = await new User({
       email,
-      fullname: username,
+      fullname,
       username,
+      profilePicture,
       authByGoogle: true,
     }).save({ validateBeforeSave: false });
 
