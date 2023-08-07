@@ -12,9 +12,11 @@ router
   .route("/logout")
   .post(checkAuth, restrictByRoles(["USER"]), userAuthController.logoutUser);
 
-router.route("/forgot-password").post(userAuthController.forgotPassword);
-
-router.route("/forgot-password/:token").post(userAuthController.updatePassword);
+router
+  .route("/forgot-password")
+  .post(userAuthController.forgotPassword)
+  .put(userAuthController.confirmEmail)
+  .patch(userAuthController.updatePassword);
 
 router
   .route("/change-password")

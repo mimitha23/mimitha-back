@@ -51,6 +51,16 @@ const UserSchema = new Schema<IUser, UserModelT, IUserMethods>(
       select: false,
     },
 
+    confirmEmailPin: {
+      type: String,
+      select: false,
+    },
+
+    emailPinResetAt: {
+      type: Date,
+      select: false,
+    },
+
     passwordResetToken: {
       type: String,
       select: false,
@@ -81,6 +91,23 @@ UserSchema.methods.checkPassword = async function (
   password
 ) {
   return await bcrypt.compare(candidatePassword, password);
+};
+
+UserSchema.methods.createConfirmEmailPin = async function (): Promise<string> {
+  let pin = "";
+
+  for (let i = 0; i < 6; i++) {
+    const randomDigit = Math.floor(Math.random() * 10);
+    pin += randomDigit;
+  }
+
+  const { hashedToken } = UserUtils.generatePasswordResetToken(pin);
+  this.confirmEmailPin = hashedToken;
+  this.emailPinResetAt = Date.now() + 1000 * 60 * 10; // 10 minutes
+
+  await this.save();
+
+  return pin;
 };
 
 UserSchema.methods.createPasswordResetToken =

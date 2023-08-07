@@ -1,19 +1,21 @@
 import { Model, Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
+  role: "USER";
   _id: string;
   fullname: string;
   username: string;
   email: string;
   profilePicture: string;
+  favorites: [Schema.Types.ObjectId];
   authByGoogle: boolean;
   password: string;
+  confirmEmailPin?: string;
+  emailPinResetAt?: Date;
   passwordResetToken?: string;
   passwordResetAt?: Date;
   createdAt: string;
   updatedAt: string;
-  role: "USER";
-  favorites: [Schema.Types.ObjectId];
 }
 
 export interface IUserMethods {
@@ -22,6 +24,7 @@ export interface IUserMethods {
     password: string
   ) => Promise<boolean>;
   createPasswordResetToken: () => Promise<string>;
+  createConfirmEmailPin: () => Promise<string>;
 }
 
 export type UserModelT = Model<IUser, {}, IUserMethods>;

@@ -24,6 +24,10 @@ export const register = Async(async function (req, res, next) {
   res.status(201).json({ accessToken, user: userData });
 });
 
+///////////////////////
+// LOGIN AND LOGOUT //
+/////////////////////
+
 export const login = Async(async function (req, res, next) {
   const { email, password } = req.body;
 
@@ -84,7 +88,11 @@ export const googleLogin = Async(async function (req, res, next) {
 
 export const logoutUser = logout();
 
-// 1.0
+//////////////////////
+// FORGOT PASSWORD //
+////////////////////
+
+// 1.0 send PIN to user by email
 export const forgotPassword = Async(async function (req, res, next) {
   const { email } = req.body;
 
@@ -95,39 +103,103 @@ export const forgotPassword = Async(async function (req, res, next) {
   if (!user)
     return next(new AppError(403, "user with this email does not exists"));
 
-  const passwordResetToken = await user.createPasswordResetToken();
+  const pin = await user.createConfirmEmailPin();
 
-  await new Email({ adressat: user.email }).sendPasswordReset({
-    userName: user.fullname,
-    resetToken: passwordResetToken,
+  await new Email({ adressat: user.email }).sendConfirmEmailPin({
+    pin,
+    userName: user.fullname || user.username,
   });
 
-  res.status(201).json({ emailIsSent: true, passwordResetToken });
+  res.status(201).json({ emailIsSent: true });
 });
 
-// 1.1 route after forgotPassword
-export const updatePassword = Async(async function (req, res, next) {
-  const { token } = req.params;
-  const { password } = req.body;
+// 1.2 confirm email with comparing PIN and assign passwordResetToken to HTTPOnly cookie
+export const confirmEmail = Async(async function (req, res, next) {
+  const { pin } = req.body;
 
-  if (!token) return next(new AppError(403, "invalid request."));
+  if (!pin)
+    return next(
+      new AppError(403, "please provide us the PIN sent to your Email")
+    );
 
   const { hashedToken } = UserUtils.generatePasswordResetToken(
-    token.toString() || ""
+    pin.toString() || ""
   );
 
-  const user = await User.findOne({
-    passwordResetToken: hashedToken,
-    passwordResetAt: { $gte: Date.now() },
-  });
+  const user = await User.findOne({ confirmEmailPin: hashedToken });
 
-  if (!user) return next(new AppError(403, "token is invalid or expired."));
+  if (!user) return next(new AppError(403, "token is invalid or is expired."));
+
+  const isExpired = Date.now() > new Date(user.emailPinResetAt!).getTime();
+
+  if (isExpired) {
+    user.confirmEmailPin = undefined;
+    user.emailPinResetAt = undefined;
+    return next(new AppError(403, "token is invalid or is expired."));
+  }
+
+  user.confirmEmailPin = undefined;
+  user.emailPinResetAt = undefined;
+
+  await user.save();
+
+  const passwordResetToken = await user.createPasswordResetToken();
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: false,
+    sameSite: false,
+  };
+
+  // if (NODE_MODE === "PROD") cookieOptions.secure = true;
+
+  res.cookie("password_reset_token", passwordResetToken, cookieOptions);
+
+  res.status(201).json({ emailIsConfirmed: true });
+});
+
+// 1.3 let user update password after validating passwordResetToken
+export const updatePassword = Async(async function (req, res, next) {
+  const { password_reset_token }: any = req.cookies;
+  const { password } = req.body;
+
+  const err = () =>
+    next(
+      new AppError(
+        403,
+        "Invalid request. Please retry the password update from sending email."
+      )
+    );
+
+  if (!password_reset_token) return err();
+
+  const { hashedToken } = UserUtils.generatePasswordResetToken(
+    password_reset_token.toString() || ""
+  );
+
+  const user = await User.findOne({ passwordResetToken: hashedToken });
+
+  if (!user) {
+    res.clearCookie("password_reset_token");
+    return err();
+  }
+
+  const isExpired = Date.now() > new Date(user.passwordResetAt!).getTime();
+
+  if (isExpired) {
+    res.clearCookie("password_reset_token");
+    user.passwordResetToken = undefined;
+    user.passwordResetAt = undefined;
+    return err();
+  }
 
   user.password = password;
   user.passwordResetToken = undefined;
   user.passwordResetAt = undefined;
 
   await user.save();
+
+  res.clearCookie("password_reset_token");
 
   res.status(201).json({ passwordIsUpdated: true });
 });
@@ -184,10 +256,10 @@ export const demandSetPassword = Async(async function (req, res, next) {
 
   const passwordResetToken = await user.createPasswordResetToken();
 
-  await new Email({ adressat: user.email }).sendPasswordReset({
-    userName: user.fullname,
-    resetToken: passwordResetToken,
-  });
+  // await new Email({ adressat: user.email }).sendPasswordReset({
+  //   userName: user.fullname,
+  //   resetToken: passwordResetToken,
+  // });
 
   res.status(201).json({ emailIsSent: true, passwordResetToken });
 });

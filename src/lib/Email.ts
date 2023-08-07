@@ -33,7 +33,7 @@ interface SendWelcomeT {
 
 interface SendPasswordResetT {
   userName: string;
-  resetToken: string;
+  pin: string;
 }
 
 class Email {
@@ -104,13 +104,13 @@ class Email {
     }
   }
 
-  async sendPasswordReset({ resetToken, userName }: SendPasswordResetT) {
+  async sendConfirmEmailPin({ pin, userName }: SendPasswordResetT) {
     try {
       await this.send({
         subject: `${AppName} Password Reset`,
         templateName: "passwordReset",
         templateParams: {
-          url: `${APP_ORIGIN}/auth/set-password/${resetToken}`,
+          pin,
           userName,
           host: SERVER_ORIGIN,
         },
