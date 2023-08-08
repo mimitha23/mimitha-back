@@ -8,7 +8,7 @@ const restrictByRoles = (roles: string[]) =>
 
     if (!roles.includes(currUserRole))
       return next(
-        new AppError(403, "you are not authorised for this operation")
+        new AppError(403, "you are not authorized for this operation")
       );
 
     next();

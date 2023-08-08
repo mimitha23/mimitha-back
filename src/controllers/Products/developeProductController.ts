@@ -65,14 +65,15 @@ export const getAllDevelopedProductsByRegisteredProduct = Async(async function (
 ) {
   const { registeredProductId } = req.params;
 
-  const docs = await new API_Features({
+  const { doc } = new API_Features({
     doc: DevelopedProduct.find({ product: registeredProductId }),
     query: req.query,
   })
     .filter()
     .sort()
-    .selectFields()
-    .execute();
+    .selectFields();
+
+  const docs = await doc;
 
   res.status(200).json(docs);
 });

@@ -3,7 +3,7 @@ import { Async } from "../lib";
 
 export const getLanding = Async(async function (req, res, next) {
   const popularProducts = await DevelopedProduct.find({ isPublic: true })
-    .populate({ path: "product", select: "category" })
+    .populate({ path: "product", select: "category productType" })
     .select("assets title price soldOut rating")
     .sort({
       soldOut: -1,
