@@ -218,3 +218,50 @@ export const getRelatedProducts = Async(async function (req, res, next) {
 
   res.status(200).json(relatedProducts);
 });
+
+export const getProductToEdit = Async(async function (req, res, next) {
+  const { registeredProductId } = req.params;
+
+  const docs = await DevelopedProduct.find({
+    product: registeredProductId,
+  }).select("assets variants isPublic");
+
+  const allVariants = await DevelopedProduct.aggregate([
+    { $match: { product: new mongoose.Types.ObjectId(registeredProductId) } },
+    {
+      $project: {
+        assets: 1,
+        isPublic: 1,
+        variants: 1,
+      },
+    },
+    {
+      $lookup: {
+        as: "variants",
+        from: "variants",
+        foreignField: "_id",
+        localField: "variants",
+      },
+    },
+    {
+      $unwind: "$variants",
+    },
+    {
+      $group: {
+        _id: null,
+        allVariants: { $addToSet: "$variants" },
+      },
+    },
+    {
+      $unwind: "$allVariants",
+    },
+    {
+      $group: {
+        _id: "$allVariants.type",
+        variants: { $addToSet: "$allVariants" },
+      },
+    },
+  ]);
+
+  res.status(200).json({ allVariants: allVariants, docs });
+});

@@ -246,6 +246,7 @@ class API_Features {
       "textures",
       "styles",
       "isEditable",
+      "_id",
     ];
 
     select &&
