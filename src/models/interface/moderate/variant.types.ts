@@ -2,9 +2,10 @@ import { Model } from "mongoose";
 
 export interface VariantT {
   type: string;
-  ka: string;
-  en: string;
-  description: string;
+  label_ka: string;
+  label_en: string;
+  description_ka: string;
+  description_en: string;
   icon: string;
 }
 

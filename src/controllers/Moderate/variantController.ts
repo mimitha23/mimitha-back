@@ -1,5 +1,5 @@
 import { Async, AppError, FileUpload } from "../../lib";
-import { Variant } from "../../models";
+import { Variant, DevelopedProduct } from "../../models";
 
 const fileUpload = new FileUpload({
   storage: "memoryStorage",
@@ -14,18 +14,19 @@ export const createVariant = Async(async function (req, res, next) {
 
   if (!req.file) return next(new AppError(400, "please upload icon"));
 
-  const newVariant = await new Variant(body).save();
+  const newVariant = new Variant(body);
 
   let downloadUrl;
 
   try {
     downloadUrl = await fileUpload.uploadFileOnFirebase({
+      convert: false,
       file: req.file,
-      contentType: "image/svg+xml",
       folder: "icons",
+      contentType: "image/svg+xml",
     });
   } catch (error) {
-    return next(new AppError(400, "occured error during file upload"));
+    return next(new AppError(400, "ocurred error during file upload"));
   }
 
   newVariant.icon = downloadUrl;
@@ -55,7 +56,7 @@ export const updateVariant = Async(async function (req, res, next) {
         downloadUrl: body.icon,
       });
     } catch (error) {
-      return next(new AppError(400, "occured error during upload icon"));
+      return next(new AppError(400, "ocurred error during upload icon"));
     }
   }
 
@@ -85,16 +86,36 @@ export const deleteVariant = Async(async function (req, res, next) {
   try {
     await fileUpload.deleteFileOnFirebase(doc.icon);
   } catch (error) {
-    return next(new AppError(400, "occured error during delete icon"));
+    return next(new AppError(400, "ocurred error during delete icon"));
   }
 
   await Variant.findByIdAndDelete(variantId);
+  await DevelopedProduct.updateMany(
+    { variants: variantId },
+    { $pull: { variants: variantId } }
+  );
 
   res.status(204).json("variant is deleted");
 });
 
 export const getExistingVariantTypes = Async(async function (req, res, next) {
-  const variants = await Variant.find().distinct("type");
+  const variants = await Variant.aggregate([
+    {
+      $project: {
+        type: 1,
+        label_ka: 1,
+        label_en: 1,
+      },
+    },
+    {
+      $group: {
+        _id: "$type",
+        type: { $first: "$type" },
+        label_ka: { $first: "$label_ka" },
+        label_en: { $first: "$label_en" },
+      },
+    },
+  ]);
 
   res.status(200).json(variants);
 });

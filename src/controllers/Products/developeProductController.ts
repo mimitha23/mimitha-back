@@ -17,9 +17,21 @@ export const uploadMedia = (filename: string) =>
 export const attachDevelopedProduct = Async(async function (req, res, next) {
   const body = req.body;
 
+  const isSimilar = await DevelopedProduct.findOne({
+    $and: [{ variants: body.variants }, { color: body.color }],
+  });
+
+  if (isSimilar)
+    return next(
+      new AppError(
+        400,
+        `Product with exact this color and variants already exists.You can find existing product with this name > '${isSimilar.title.en}'`
+      )
+    );
+
   if (!req.files) return next(new AppError(400, "please upload assets"));
 
-  const doc = await new DevelopedProduct(body).save();
+  const doc = new DevelopedProduct(body);
 
   let downloadUrls;
 

@@ -10,17 +10,19 @@ const VariantSchema = new Schema<VariantT, VariantModelT, VariantMethodsT>({
     type: String,
     required: true,
   },
-  ka: {
+  label_ka: {
     type: String,
     required: true,
-    unique: true,
   },
-  en: {
+  label_en: {
     type: String,
     required: true,
-    unique: true,
   },
-  description: {
+  description_ka: {
+    type: String,
+    required: true,
+  },
+  description_en: {
     type: String,
     required: true,
   },

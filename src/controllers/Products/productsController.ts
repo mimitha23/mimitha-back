@@ -27,21 +27,69 @@ export const getAllDevelopedProducts = Async(async function (req, res, next) {
 export const getActiveProduct = Async(async function (req, res, next) {
   const { productId } = req.params;
 
-  const doc = await DevelopedProduct.findById(productId)
-    .populate({
-      path: "product",
-      select: "-attachedProducts -createdAt -updatedAt -__v -thumbnail",
-      populate: {
-        path: "developedProducts",
-        select: "color",
-        match: { isPublic: true },
+  const doc = await DevelopedProduct.findById(productId);
+
+  const docs = await DevelopedProduct.aggregate([
+    {
+      $match: { _id: new mongoose.Types.ObjectId(productId) },
+    },
+    {
+      $project: {
+        __v: 0,
+        isPublic: 0,
+        variants: 0,
+        createdAt: 0,
+        updatedAt: 0,
       },
-    })
-    .select("-__v -isPublic -variants -createdAt -updatedAt");
+    },
+    {
+      $lookup: {
+        as: "product",
+        from: "registeredproducts",
+        foreignField: "_id",
+        localField: "product",
+        pipeline: [
+          {
+            $project: {
+              attachedProducts: 0,
+              createdAt: 0,
+              updatedAt: 0,
+              thumbnail: 0,
+              __v: 0,
+            },
+          },
+          {
+            $lookup: {
+              as: "developedProducts",
+              from: "developedproducts",
+              foreignField: "_id",
+              localField: "developedProducts",
+              pipeline: [
+                {
+                  $match: {
+                    isPublic: true,
+                    variants: doc?.variants,
+                  },
+                },
+                {
+                  $project: {
+                    color: 1,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: "$product",
+    },
+  ]);
 
-  if (!doc) return next(new AppError(404, "there ane no such product"));
+  if (!docs[0]) return next(new AppError(404, "there ane no such product"));
 
-  res.status(200).json(doc);
+  res.status(200).json(docs[0]);
 });
 
 export const searchProducts = Async(async function (req, res, next) {

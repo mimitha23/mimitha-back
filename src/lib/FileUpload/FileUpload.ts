@@ -132,12 +132,14 @@ export default class FileUpload extends MulterConfig(
     file,
     folder,
     contentType,
+    convert = true,
   }: UploadFileOnFirebaseT): Promise<string> {
     try {
-      const convertedFile = await this.convertFile(file);
+      let convertedFile;
+      if (convert) convertedFile = await this.convertFile(file);
 
       const configuredFileName = this.generateFilenameForFirebase(
-        convertedFile.originalname
+        convert ? convertedFile.originalname : file.originalname
       );
 
       const storageRef = this.getStorageRef(
@@ -146,7 +148,7 @@ export default class FileUpload extends MulterConfig(
 
       const uploadedFileRef = await uploadBytes(
         storageRef,
-        Buffer.from(convertedFile.buffer),
+        Buffer.from(convert ? convertedFile.buffer : file.buffer),
         {
           contentType,
         }

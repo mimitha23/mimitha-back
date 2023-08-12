@@ -31,9 +31,11 @@ const FileUploadUtils = (Base?: any) =>
     generateFileObjectFromBuffer(file: FileT, convertedImage: any): FileT {
       return {
         fieldname: file.fieldname,
-        originalname: file.originalname.replace(/\.[^/.]+$/, "") + ".webp",
+        originalname:
+          file.originalname.replace(/\.[^/.]+$/, "") +
+          file.originalname.substring(file.originalname.lastIndexOf(".")),
         encoding: file.encoding,
-        mimetype: "image/webp",
+        mimetype: file.mimetype,
         buffer: convertedImage,
         size: convertedImage.length,
         destination: file.destination || "",

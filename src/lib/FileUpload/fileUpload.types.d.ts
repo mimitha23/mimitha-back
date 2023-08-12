@@ -52,6 +52,7 @@ export interface UploadFileOnFirebaseT {
   file: FileT;
   folder: keyof typeof firebaseFolders;
   contentType: "image/svg+xml" | "image/webp";
+  convert?: boolean;
 }
 
 export interface UpdateFileOnFirebaseT extends UploadFileOnFirebaseT {
