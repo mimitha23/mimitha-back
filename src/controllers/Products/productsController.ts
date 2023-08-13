@@ -306,6 +306,9 @@ export const getProductToEdit = Async(async function (req, res, next) {
     {
       $group: {
         _id: "$allVariants.type",
+        type: { $first: "$allVariants.type" },
+        label_ka: { $first: "$allVariants.label_ka" },
+        label_en: { $first: "$allVariants.label_en" },
         variants: { $addToSet: "$allVariants" },
       },
     },
