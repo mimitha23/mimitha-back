@@ -1,8 +1,8 @@
 import {
   SharpWriteOnDisk,
   SharpEditAndWriteOnDiskT,
-  FileT,
-} from "./fileUpload.types";
+} from "./interface/sharp.types";
+import { FileT } from "./interface/firebase.types";
 import sharp from "sharp";
 
 const SharpConfig = (Base?: any) =>

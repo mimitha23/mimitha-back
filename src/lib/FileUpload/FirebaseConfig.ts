@@ -1,5 +1,5 @@
-import { ref, getStorage } from "firebase/storage";
 import { app } from "../../services/firebase";
+import { ref, getStorage } from "firebase/storage";
 import { FIREBASE_STORAGE_BUCKET } from "../../config/env";
 
 export default class FirebaseConfig {

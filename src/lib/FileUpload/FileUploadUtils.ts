@@ -1,4 +1,5 @@
-import { FileT, GenerateFileNameT } from "./fileUpload.types";
+import { FileT } from "./interface/firebase.types";
+import { GenerateFileNameT } from "./interface/utils.types";
 
 const FileUploadUtils = (Base?: any) =>
   class extends Base {

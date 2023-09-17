@@ -6,14 +6,14 @@ import FileUploadUtils from "./FileUploadUtils";
 import FirebaseConfig from "./FirebaseConfig";
 
 import {
-  FileT,
-  FileUploadT,
-  UploadMediaT,
   UploadFileOnFirebaseT,
   UpdateFileOnFirebaseT,
   UploadMultipleFilesOnFirebaseT,
   UpdateMultipleFilesOnFirebaseT,
-} from "./fileUpload.types";
+} from "./interface/firebase.types";
+import { FileT } from "./interface/firebase.types";
+import { FileUploadT } from "./interface/utils.types";
+import { MulterConfigT } from "./interface/multer.types";
 import { firebaseFolders } from "../../config/config";
 import { uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
@@ -34,7 +34,7 @@ export default class FileUpload extends MulterConfig(
     // multer
     upload = "any",
     storage = "diskStorage",
-    destination = "",
+    destination = "/public/assets",
     // sharp
     multy = true,
     quality = 30,
@@ -59,12 +59,19 @@ export default class FileUpload extends MulterConfig(
     this.height = height;
   }
 
-  uploadMedia({ filename }: UploadMediaT) {
+  uploadMedia({
+    filename,
+    contentType = "image",
+  }: {
+    filename: MulterConfigT["filename"];
+    contentType?: MulterConfigT["contentType"];
+  }) {
     return this.multerConfig({
       filename,
-      destination: this.destination,
+      contentType,
       upload: this.upload,
       storage: this.storage,
+      destination: this.destination,
     });
   }
 

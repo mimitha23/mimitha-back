@@ -5,53 +5,131 @@ import {
   RegisteredProduct,
 } from "../../models";
 import { Async, AppError, FileUpload, API_Features } from "../../lib";
+import { MulterUploadFieldsT } from "../../lib/FileUpload/interface/multer.types";
+import { NextFunction, Request, Response } from "express";
+import { FileT } from "../../lib/FileUpload/interface/firebase.types";
 
 const fileUpload = new FileUpload({
+  upload: "fields",
   storage: "memoryStorage",
-  upload: "any",
 });
 
-export const uploadMedia = (filename: string) =>
-  fileUpload.uploadMedia({ filename });
+export const uploadImageMedia = (filename: MulterUploadFieldsT) =>
+  fileUpload.uploadMedia({ filename, contentType: "any" });
 
-export const attachDevelopedProduct = Async(async function (req, res, next) {
+export const attachDevelopedProduct = Async(async function (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const body = req.body;
 
-  const isSimilar = await DevelopedProduct.findOne({
-    $and: [{ variants: body.variants }, { color: body.color }],
-  });
+  // const isSimilar = await DevelopedProduct.findOne({
+  //   $and: [{ variants: body.variants }, { color: body.color }],
+  // });
 
-  if (isSimilar)
-    return next(
-      new AppError(
-        400,
-        `Product with exact this color and variants already exists.You can find existing product with this name > '${isSimilar.title.en}'`
+  // if (isSimilar)
+  //   return next(
+  //     new AppError(
+  //       400,
+  //       `Product with exact this color and variants already exists.You can find existing product with this name > '${isSimilar.title.en}'`
+  //     )
+  //   );
+
+  // if (!req.files) return next(new AppError(400, "please upload assets"));
+
+  // const doc = new DevelopedProduct(body);
+
+  const downloadUrls: {
+    assets: string[];
+    thumbnails: string[];
+    mannequin: string;
+    modelVideo: string;
+    editorSimulation: {
+      placing: string;
+      pick_up: string;
+    };
+  } = {
+    assets: [],
+    thumbnails: [],
+    mannequin: "",
+    modelVideo: "",
+    editorSimulation: {
+      placing: "",
+      pick_up: "",
+    },
+  };
+
+  function isFileArray(files: any): files is FileT[] {
+    return (
+      Array.isArray(files) &&
+      files.every(
+        (file) =>
+          file &&
+          typeof file === "object" &&
+          "fieldname" in file &&
+          "originalname" in file
       )
     );
+  }
 
-  if (!req.files) return next(new AppError(400, "please upload assets"));
-
-  const doc = new DevelopedProduct(body);
-
-  let downloadUrls;
+  const new_simulation_video_placing =
+    req.files["new_simulation_video_placing" as keyof typeof req.files];
+  const new_simulation_video_pick_up =
+    req.files["new_simulation_video_pick_up" as keyof typeof req.files];
+  const new_model_video =
+    req.files["new_model_video" as keyof typeof req.files];
+  const new_mannequin = req.files["new_mannequin" as keyof typeof req.files];
 
   try {
-    downloadUrls = await fileUpload.uploadMultipleFilesOnFirebase({
-      files: req.files,
-      folder: "products",
-      contentType: "image/webp",
-    });
+    if (isFileArray(new_simulation_video_placing)) {
+      downloadUrls.editorSimulation.placing =
+        await fileUpload.uploadFileOnFirebase({
+          file: new_simulation_video_placing[0],
+          folder: "videos",
+          contentType: "video/mp4",
+          convert: false,
+        });
+    }
+
+    if (isFileArray(new_simulation_video_pick_up)) {
+      downloadUrls.editorSimulation.pick_up =
+        await fileUpload.uploadFileOnFirebase({
+          file: new_simulation_video_pick_up[0],
+          folder: "videos",
+          contentType: "video/mp4",
+          convert: false,
+        });
+    }
+
+    if (isFileArray(new_model_video)) {
+      downloadUrls.modelVideo = await fileUpload.uploadFileOnFirebase({
+        file: new_model_video[0],
+        folder: "videos",
+        contentType: "video/mp4",
+        convert: false,
+      });
+    }
+
+    if (isFileArray(new_mannequin)) {
+      downloadUrls.mannequin = await fileUpload.uploadFileOnFirebase({
+        file: new_mannequin[0],
+        folder: "products",
+        contentType: "image/webp",
+        convert: true,
+      });
+    }
   } catch (error: any) {
     return next(new AppError(400, "occurred error during upload assets"));
   }
 
-  doc.assets = downloadUrls;
-  await doc.save();
+  // doc.assets = downloadUrls;
+  // await doc.save();
 
-  await RegisteredProduct.findByIdAndUpdate(doc.product, {
-    $inc: { attachedProducts: 1 },
-    $push: { developedProducts: doc._id },
-  });
+  // await RegisteredProduct.findByIdAndUpdate(doc.product, {
+  //   $inc: { attachedProducts: 1 },
+  //   $push: { developedProducts: doc._id },
+  // });
 
   res.status(201).json("product is attached");
 });
@@ -197,7 +275,7 @@ export const deleteDevelopedProduct = Async(async function (req, res, next) {
   res.status(204).json("color is deleted");
 });
 
-export const getDevelopeProductFormSugestions = Async(async function (
+export const getDevelopeProductFormSuggestions = Async(async function (
   req,
   res,
   next

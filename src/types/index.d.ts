@@ -14,9 +14,7 @@ declare global {
       files: Express.Multer.File[];
       editedFileName: string | string[];
       originalFileName: string | string[];
-      // files:
-      //   | { [fieldname: string]: Express.Multer.File[] }
-      //   | Express.Multer.File[];
+      files: { [key: string]: Express.Multer.File[] } | Express.Multer.File[];
     }
   }
 }

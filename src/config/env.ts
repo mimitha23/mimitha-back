@@ -156,6 +156,10 @@ function generateOrigin(key: "APP" | "DASHBOARD" | "SERVER"): string {
 
 function generateAppOrigins(): string[] {
   return NODE_MODE === "DEV"
-    ? [DEV_APP_ORIGIN, DEV_DASHBOARD_ORIGIN]
+    ? [
+        DEV_APP_ORIGIN,
+        DEV_DASHBOARD_ORIGIN,
+        "https://6b26-185-15-114-72.ngrok-free.app",
+      ]
     : [PROD_APP_ORIGIN, PROD_DASHBOARD_ORIGIN];
 }

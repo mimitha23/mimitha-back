@@ -3,6 +3,7 @@ export const AppName = "Mimitha";
 export const firebaseFolders = {
   icons: "/icons",
   products: "/products",
+  videos: "/videos",
 };
 
 export const USER_DEFAULT_AVATAR =
