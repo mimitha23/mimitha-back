@@ -117,6 +117,32 @@ const DevelopedProductSchema = new Schema<
         type: String,
       },
     ],
+
+    thumbnails: [
+      {
+        type: String,
+      },
+    ],
+
+    mannequin: {
+      type: String,
+      required: true,
+    },
+
+    placingVideo: {
+      type: String,
+      required: true,
+    },
+
+    pickUpVideo: {
+      type: String,
+      required: true,
+    },
+
+    modelVideo: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

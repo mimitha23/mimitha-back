@@ -4,10 +4,13 @@ import {
   DevelopedProduct,
   RegisteredProduct,
 } from "../../models";
+import {
+  FileT,
+  UploadFileOnFirebaseT,
+} from "../../lib/FileUpload/interface/firebase.types";
+import { NextFunction, Request, Response } from "express";
 import { Async, AppError, FileUpload, API_Features } from "../../lib";
 import { MulterUploadFieldsT } from "../../lib/FileUpload/interface/multer.types";
-import { NextFunction, Request, Response } from "express";
-import { FileT } from "../../lib/FileUpload/interface/firebase.types";
 
 const fileUpload = new FileUpload({
   upload: "fields",
@@ -24,112 +27,41 @@ export const attachDevelopedProduct = Async(async function (
 ) {
   const body = req.body;
 
-  // const isSimilar = await DevelopedProduct.findOne({
-  //   $and: [{ variants: body.variants }, { color: body.color }],
-  // });
+  const isSimilar = await DevelopedProduct.findOne({
+    $and: [{ variants: body.variants }, { color: body.color }],
+  });
 
-  // if (isSimilar)
-  //   return next(
-  //     new AppError(
-  //       400,
-  //       `Product with exact this color and variants already exists.You can find existing product with this name > '${isSimilar.title.en}'`
-  //     )
-  //   );
-
-  // if (!req.files) return next(new AppError(400, "please upload assets"));
-
-  // const doc = new DevelopedProduct(body);
-
-  const downloadUrls: {
-    assets: string[];
-    thumbnails: string[];
-    mannequin: string;
-    modelVideo: string;
-    editorSimulation: {
-      placing: string;
-      pick_up: string;
-    };
-  } = {
-    assets: [],
-    thumbnails: [],
-    mannequin: "",
-    modelVideo: "",
-    editorSimulation: {
-      placing: "",
-      pick_up: "",
-    },
-  };
-
-  function isFileArray(files: any): files is FileT[] {
-    return (
-      Array.isArray(files) &&
-      files.every(
-        (file) =>
-          file &&
-          typeof file === "object" &&
-          "fieldname" in file &&
-          "originalname" in file
+  if (isSimilar)
+    return next(
+      new AppError(
+        400,
+        `Product with exact this color and variants already exists.You can find existing product with this name > '${isSimilar.title.en}'`
       )
     );
-  }
 
-  const new_simulation_video_placing =
-    req.files["new_simulation_video_placing" as keyof typeof req.files];
-  const new_simulation_video_pick_up =
-    req.files["new_simulation_video_pick_up" as keyof typeof req.files];
-  const new_model_video =
-    req.files["new_model_video" as keyof typeof req.files];
-  const new_mannequin = req.files["new_mannequin" as keyof typeof req.files];
+  if (!req.files) return next(new AppError(400, "please upload assets"));
+
+  const doc = new DevelopedProduct(body);
 
   try {
-    if (isFileArray(new_simulation_video_placing)) {
-      downloadUrls.editorSimulation.placing =
-        await fileUpload.uploadFileOnFirebase({
-          file: new_simulation_video_placing[0],
-          folder: "videos",
-          contentType: "video/mp4",
-          convert: false,
-        });
-    }
+    const downloadUrls = await uploadAllDevelopeProductAssets(req);
 
-    if (isFileArray(new_simulation_video_pick_up)) {
-      downloadUrls.editorSimulation.pick_up =
-        await fileUpload.uploadFileOnFirebase({
-          file: new_simulation_video_pick_up[0],
-          folder: "videos",
-          contentType: "video/mp4",
-          convert: false,
-        });
-    }
-
-    if (isFileArray(new_model_video)) {
-      downloadUrls.modelVideo = await fileUpload.uploadFileOnFirebase({
-        file: new_model_video[0],
-        folder: "videos",
-        contentType: "video/mp4",
-        convert: false,
-      });
-    }
-
-    if (isFileArray(new_mannequin)) {
-      downloadUrls.mannequin = await fileUpload.uploadFileOnFirebase({
-        file: new_mannequin[0],
-        folder: "products",
-        contentType: "image/webp",
-        convert: true,
-      });
-    }
+    doc.assets = downloadUrls.assets;
+    doc.thumbnails = downloadUrls.thumbnails;
+    doc.mannequin = downloadUrls.mannequin;
+    doc.placingVideo = downloadUrls.placing;
+    doc.pickUpVideo = downloadUrls.pick_up;
+    doc.modelVideo = downloadUrls.modelVideo;
   } catch (error: any) {
-    return next(new AppError(400, "occurred error during upload assets"));
+    return next(new AppError(400, "occurred error during upload files"));
   }
 
-  // doc.assets = downloadUrls;
-  // await doc.save();
+  await doc.save();
 
-  // await RegisteredProduct.findByIdAndUpdate(doc.product, {
-  //   $inc: { attachedProducts: 1 },
-  //   $push: { developedProducts: doc._id },
-  // });
+  await RegisteredProduct.findByIdAndUpdate(doc.product, {
+    $inc: { attachedProducts: 1 },
+    $push: { developedProducts: doc._id },
+  });
 
   res.status(201).json("product is attached");
 });
@@ -313,3 +245,129 @@ export const getDevelopeProductFormSuggestions = Async(async function (
 
   res.status(200).json({ variants, colors, sizes });
 });
+
+// UTILS
+
+async function uploadAllDevelopeProductAssets(req: Request) {
+  try {
+    const downloadUrls: {
+      assets: any;
+      thumbnails: any;
+      mannequin: any;
+      modelVideo: any;
+      placing: any;
+      pick_up: any;
+    } = {
+      assets: [],
+      thumbnails: [],
+      mannequin: "",
+      modelVideo: "",
+      placing: "",
+      pick_up: "",
+    };
+
+    function isFileArray(files: any): files is FileT[] {
+      return (
+        Array.isArray(files) &&
+        files.every(
+          (file) =>
+            file &&
+            typeof file === "object" &&
+            "fieldname" in file &&
+            "originalname" in file
+        )
+      );
+    }
+
+    const new_simulation_video_placing =
+      req.files["new_simulation_video_placing" as keyof typeof req.files];
+    const new_simulation_video_pick_up =
+      req.files["new_simulation_video_pick_up" as keyof typeof req.files];
+    const new_model_video =
+      req.files["new_model_video" as keyof typeof req.files];
+    const new_mannequin = req.files["new_mannequin" as keyof typeof req.files];
+    const new_thumbnails =
+      req.files["new_thumbnails[]" as keyof typeof req.files];
+    const new_assets = req.files["new_assets[]" as keyof typeof req.files];
+
+    const allFieldsArr: {
+      field: any;
+      single: boolean;
+      convert: boolean;
+      key: keyof typeof downloadUrls;
+      folder: UploadFileOnFirebaseT["folder"];
+      contentType: UploadFileOnFirebaseT["contentType"];
+    }[] = [
+      {
+        single: true,
+        convert: false,
+        key: "placing",
+        folder: "videos",
+        contentType: "video/mp4",
+        field: new_simulation_video_placing,
+      },
+      {
+        single: true,
+        convert: false,
+        key: "pick_up",
+        folder: "videos",
+        contentType: "video/mp4",
+        field: new_simulation_video_pick_up,
+      },
+      {
+        single: true,
+        convert: false,
+        key: "modelVideo",
+        folder: "videos",
+        contentType: "video/mp4",
+        field: new_model_video,
+      },
+      {
+        single: true,
+        convert: true,
+        key: "mannequin",
+        folder: "products",
+        contentType: "image/webp",
+        field: new_mannequin,
+      },
+      {
+        single: false,
+        convert: true,
+        key: "assets",
+        folder: "products",
+        contentType: "image/webp",
+        field: new_assets,
+      },
+      {
+        single: false,
+        convert: true,
+        key: "thumbnails",
+        folder: "products",
+        contentType: "image/webp",
+        field: new_thumbnails,
+      },
+    ];
+
+    if (allFieldsArr.every((item) => isFileArray(item.field)))
+      await Promise.all(
+        allFieldsArr.map(async (block) => {
+          downloadUrls[block.key] = block.single
+            ? await fileUpload.uploadFileOnFirebase({
+                file: block.field[0],
+                folder: block.folder,
+                contentType: block.contentType,
+                convert: block.convert,
+              })
+            : await fileUpload.uploadMultipleFilesOnFirebase({
+                files: block.field,
+                folder: block.folder,
+                contentType: "image/webp",
+              });
+        })
+      );
+
+    return downloadUrls;
+  } catch (error) {
+    throw error;
+  }
+}

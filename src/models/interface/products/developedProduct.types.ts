@@ -31,6 +31,11 @@ export interface DevelopedProductT extends Document {
     en: string;
   };
   assets: string[];
+  thumbnails: string[];
+  mannequin: string;
+  placingVideo: string;
+  pickUpVideo: string;
+  modelVideo: string;
   createdAt: Date;
   updatedAt: Date;
 }
