@@ -44,14 +44,17 @@ export const attachDevelopedProduct = Async(async function (
   const doc = new DevelopedProduct(body);
 
   try {
-    const downloadUrls = await uploadAllDevelopeProductAssets(req);
+    const downloadUrls = await uploadAllDevelopeProductAssets(req, true);
 
     doc.assets = downloadUrls.assets;
-    doc.thumbnails = downloadUrls.thumbnails;
     doc.mannequin = downloadUrls.mannequin;
     doc.placingVideo = downloadUrls.placing;
     doc.pickUpVideo = downloadUrls.pick_up;
     doc.modelVideo = downloadUrls.modelVideo;
+    doc.thumbnails = [
+      downloadUrls.front_thumbnail,
+      downloadUrls.back_thumbnail,
+    ];
   } catch (error: any) {
     return next(new AppError(400, "occurred error during upload files"));
   }
@@ -125,17 +128,13 @@ export const copyDevelopedProductConfig = Async(async function (
   res.status(200).json(doc[0]);
 });
 
-export const updateDevelopedProduct = Async(async function (req, res, next) {
+export const updateDevelopedProduct = Async(async function (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const { productId } = req.params;
   const body = req.body;
-
-  const isFilesToDelete =
-    Array.isArray(body.filesToDelete) && body.filesToDelete[0] ? true : false;
-
-  if (isFilesToDelete && Array.isArray(body.assets))
-    body.assets = body.assets.filter(
-      (asset: string) => !body.filesToDelete.includes(asset)
-    );
 
   const doc = await DevelopedProduct.findByIdAndUpdate(
     productId,
@@ -147,29 +146,67 @@ export const updateDevelopedProduct = Async(async function (req, res, next) {
 
   if (!doc) return next(new AppError(400, "there ane no such product"));
 
-  let downloadUrls;
+  const filesToDelete: string[] = [];
 
-  // upload files and delete removed files
+  if (body?.assetsToDelete?.[0]) {
+    body.assetsToDelete.forEach((asset: string) => {
+      filesToDelete.push(asset);
+    });
+
+    doc.assets = doc.assets.filter(
+      (asset: string) => !body.assetsToDelete.includes(asset)
+    );
+  }
+
+  // upload files and set files to delete
   if (req.files) {
     try {
-      downloadUrls = await fileUpload.updateMultipleFilesOnFirebase({
-        files: req.files,
-        folder: "products",
-        contentType: "image/webp",
-        downloadUrls: body.filesToDelete || [],
-      });
+      const downloadUrls = await uploadAllDevelopeProductAssets(req, false);
+
+      if (downloadUrls.assets[0]) {
+        doc.assets = [...doc.assets, ...downloadUrls.assets];
+      }
+
+      if (downloadUrls.front_thumbnail) {
+        filesToDelete.push(doc.thumbnails[0]);
+        doc.thumbnails[0] = downloadUrls.front_thumbnail;
+      }
+
+      if (downloadUrls.back_thumbnail) {
+        filesToDelete.push(doc.thumbnails[1]);
+        doc.thumbnails[1] = downloadUrls.back_thumbnail;
+      }
+
+      if (downloadUrls.mannequin) {
+        filesToDelete.push(doc.mannequin);
+        doc.mannequin = downloadUrls.mannequin;
+      }
+
+      if (downloadUrls.placing) {
+        filesToDelete.push(doc.placingVideo);
+        doc.placingVideo = downloadUrls.placing;
+      }
+
+      if (downloadUrls.pick_up) {
+        filesToDelete.push(doc.pickUpVideo);
+        doc.pickUpVideo = downloadUrls.pick_up;
+      }
+
+      if (downloadUrls.modelVideo) {
+        filesToDelete.push(doc.modelVideo);
+        doc.modelVideo = downloadUrls.modelVideo;
+      }
     } catch (error: any) {
       return next(
-        new AppError(
-          400,
-          error.message || "occurred error during update assets"
-        )
+        new AppError(400, error.message || "occurred error during update files")
       );
     }
     // if there are no new files but are removed files, delete them
-  } else if (isFilesToDelete) {
+  }
+
+  if (filesToDelete[0]) {
     try {
-      await fileUpload.deleteMultipleFilesOnFirebase(body.filesToDelete);
+      await fileUpload.deleteMultipleFilesOnFirebase(filesToDelete);
     } catch (error) {
       return next(
         new AppError(400, "occurred error during delete removed files")
@@ -177,13 +214,9 @@ export const updateDevelopedProduct = Async(async function (req, res, next) {
     }
   }
 
-  // if there were new files, join them to previous assets
-  if (downloadUrls && Array.isArray(downloadUrls))
-    doc.set("assets", [...doc.assets, ...downloadUrls]);
-
   await doc.save();
 
-  res.status(201).json(doc);
+  res.status(201).json("product is updated");
 });
 
 export const deleteDevelopedProduct = Async(async function (req, res, next) {
@@ -194,7 +227,16 @@ export const deleteDevelopedProduct = Async(async function (req, res, next) {
   if (!doc) return next(new AppError(400, "there ane no such product"));
 
   try {
-    await fileUpload.deleteMultipleFilesOnFirebase(doc.assets);
+    const filesToDelete: string[] = [
+      ...doc.assets,
+      ...doc.thumbnails,
+      doc.mannequin,
+      doc.modelVideo,
+      doc.placingVideo,
+      doc.pickUpVideo,
+    ];
+
+    await fileUpload.deleteMultipleFilesOnFirebase(filesToDelete);
   } catch (error) {
     return next(new AppError(400, "occurred error during delete thumbnail"));
   }
@@ -248,18 +290,23 @@ export const getDevelopeProductFormSuggestions = Async(async function (
 
 // UTILS
 
-async function uploadAllDevelopeProductAssets(req: Request) {
+async function uploadAllDevelopeProductAssets(
+  req: Request,
+  isAllFieldsRequired: boolean
+) {
   try {
     const downloadUrls: {
       assets: any;
-      thumbnails: any;
+      front_thumbnail: any;
+      back_thumbnail: any;
       mannequin: any;
       modelVideo: any;
       placing: any;
       pick_up: any;
     } = {
       assets: [],
-      thumbnails: [],
+      front_thumbnail: "",
+      back_thumbnail: "",
       mannequin: "",
       modelVideo: "",
       placing: "",
@@ -286,8 +333,10 @@ async function uploadAllDevelopeProductAssets(req: Request) {
     const new_model_video =
       req.files["new_model_video" as keyof typeof req.files];
     const new_mannequin = req.files["new_mannequin" as keyof typeof req.files];
-    const new_thumbnails =
-      req.files["new_thumbnails[]" as keyof typeof req.files];
+    const new_front_thumbnail =
+      req.files["new_front_thumbnail" as keyof typeof req.files];
+    const new_back_thumbnail =
+      req.files["new_back_thumbnail" as keyof typeof req.files];
     const new_assets = req.files["new_assets[]" as keyof typeof req.files];
 
     const allFieldsArr: {
@@ -331,6 +380,22 @@ async function uploadAllDevelopeProductAssets(req: Request) {
         field: new_mannequin,
       },
       {
+        single: true,
+        convert: true,
+        key: "front_thumbnail",
+        folder: "products",
+        contentType: "image/webp",
+        field: new_front_thumbnail,
+      },
+      {
+        single: true,
+        convert: true,
+        key: "back_thumbnail",
+        folder: "products",
+        contentType: "image/webp",
+        field: new_back_thumbnail,
+      },
+      {
         single: false,
         convert: true,
         key: "assets",
@@ -338,34 +403,35 @@ async function uploadAllDevelopeProductAssets(req: Request) {
         contentType: "image/webp",
         field: new_assets,
       },
-      {
-        single: false,
-        convert: true,
-        key: "thumbnails",
-        folder: "products",
-        contentType: "image/webp",
-        field: new_thumbnails,
-      },
     ];
 
-    if (allFieldsArr.every((item) => isFileArray(item.field)))
+    if (
+      (isAllFieldsRequired &&
+        allFieldsArr.every((item) => isFileArray(item.field))) ||
+      (!isAllFieldsRequired &&
+        allFieldsArr.some((item) => isFileArray(item.field)))
+    ) {
       await Promise.all(
-        allFieldsArr.map(async (block) => {
-          downloadUrls[block.key] = block.single
-            ? await fileUpload.uploadFileOnFirebase({
-                file: block.field[0],
-                folder: block.folder,
-                contentType: block.contentType,
-                convert: block.convert,
-              })
-            : await fileUpload.uploadMultipleFilesOnFirebase({
-                files: block.field,
-                folder: block.folder,
-                contentType: "image/webp",
-              });
-        })
+        allFieldsArr
+          .filter((block) =>
+            isAllFieldsRequired ? block : isFileArray(block.field)
+          )
+          .map(async (block) => {
+            downloadUrls[block.key] = block.single
+              ? await fileUpload.uploadFileOnFirebase({
+                  file: block.field[0],
+                  folder: block.folder,
+                  contentType: block.contentType,
+                  convert: block.convert,
+                })
+              : await fileUpload.uploadMultipleFilesOnFirebase({
+                  files: block.field,
+                  folder: block.folder,
+                  contentType: "image/webp",
+                });
+          })
       );
-
+    }
     return downloadUrls;
   } catch (error) {
     throw error;

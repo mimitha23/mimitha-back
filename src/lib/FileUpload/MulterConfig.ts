@@ -27,7 +27,7 @@ const MulterConfig = (Base?: any) =>
           fileFilter: this.mediaFilter(contentType),
           limits: {
             files: 16,
-            fileSize: 10 * 1024 * 1024,
+            fileSize: 20 * 1024 * 1024,
           },
         }).fields(filename as MulterUploadFieldsT);
       else

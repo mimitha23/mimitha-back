@@ -142,7 +142,6 @@ export default class FileUpload extends MulterConfig(
     convert = true,
   }: UploadFileOnFirebaseT): Promise<string> {
     try {
-      console.log("fb upload");
       let convertedFile;
       if (convert) convertedFile = await this.convertFile(file);
 

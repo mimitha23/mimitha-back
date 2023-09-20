@@ -28,8 +28,8 @@ export default class FirebaseConfig {
   }
 
   generateFilenameForFirebase(originalname: string) {
-    return `${new Date().getTime()}-${Math.floor(Math.random() * 5000)}-${
-      originalname.split(" ").join("-") || "unknown"
-    }`;
+    return `fb-firebase__${new Date().getTime()}-${Math.floor(
+      Math.random() * 5000
+    )}-${originalname.split(" ").join("-") || "unknown"}`;
   }
 }
