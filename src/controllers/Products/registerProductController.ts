@@ -114,15 +114,28 @@ export const updateRegisteredProduct = Async(async function (req, res, next) {
 export const deleteRegisteredProduct = Async(async function (req, res, next) {
   const { productId } = req.params;
 
-  const doc = await RegisteredProduct.findByIdAndDelete(productId).populate({
+  const doc = await RegisteredProduct.findById(productId).populate({
     path: "developedProducts",
-    select: "assets",
+    select: "assets thumbnails mannequin modelVideo placingVideo pickUpVideo",
   });
 
   if (!doc) return next(new AppError(400, "there ane no such product"));
 
   const developedProductsAssets = doc.developedProducts.flatMap(
     (product: any) => product.assets
+  );
+
+  const developedProductsThumbnails = doc.developedProducts.flatMap(
+    (product: any) => product.thumbnails
+  );
+
+  const developedProductsOtherAssets = doc.developedProducts.flatMap(
+    (product: any) => [
+      product.mannequin,
+      product.modelVideo,
+      product.placingVideo,
+      product.pickUpVideo,
+    ]
   );
 
   const developedProductsIds = doc.developedProducts.flatMap(
@@ -132,8 +145,14 @@ export const deleteRegisteredProduct = Async(async function (req, res, next) {
   await DevelopedProduct.deleteMany({ _id: { $in: developedProductsIds } });
 
   try {
-    await fileUpload.deleteFileOnFirebase(doc.thumbnail);
-    await fileUpload.deleteMultipleFilesOnFirebase(developedProductsAssets);
+    const filesToDelete: string[] = [
+      ...developedProductsAssets,
+      ...developedProductsThumbnails,
+      ...developedProductsOtherAssets,
+      doc.thumbnail,
+    ];
+
+    await fileUpload.deleteMultipleFilesOnFirebase(filesToDelete);
   } catch (error) {
     return next(new AppError(400, "ocurred error during delete thumbnail"));
   }
