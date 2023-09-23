@@ -102,7 +102,7 @@ export const searchProducts = Async(async function (req, res, next) {
     [titleLocale]: { $regex: search, $options: "i" },
   })
     .populate({ path: "product", select: "category productType isEditable" })
-    .select("title assets price soldOut size color");
+    .select("title thumbnails price soldOut size color");
 
   res.status(200).json(docs);
 });

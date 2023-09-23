@@ -114,7 +114,7 @@ export const updateRegisteredProduct = Async(async function (req, res, next) {
 export const deleteRegisteredProduct = Async(async function (req, res, next) {
   const { productId } = req.params;
 
-  const doc = await RegisteredProduct.findById(productId).populate({
+  const doc = await RegisteredProduct.findByIdAndDelete(productId).populate({
     path: "developedProducts",
     select: "assets thumbnails mannequin modelVideo placingVideo pickUpVideo",
   });
