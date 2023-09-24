@@ -272,7 +272,9 @@ export const getProductToEdit = Async(async function (req, res, next) {
 
   const docs = await DevelopedProduct.find({
     product: registeredProductId,
-  }).select("assets variants isPublic");
+  }).select(
+    "assets mannequin modelVideo placingVideo pickUpVideo variants isPublic"
+  );
 
   const allVariants = await DevelopedProduct.aggregate([
     { $match: { product: new mongoose.Types.ObjectId(registeredProductId) } },
