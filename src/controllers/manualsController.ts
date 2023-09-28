@@ -1,4 +1,4 @@
-import { Staff, Seasons, Gender, Category } from "../models";
+import { Staff, Seasons, Gender, Category, Nav } from "../models";
 import { Async, AppError } from "../lib";
 
 export const createAdmin = Async(async function (req, res, next) {
@@ -105,4 +105,27 @@ export const createModerateDefaults = Async(async function (req, res, next) {
   res.status(201).json("defaults are created");
 });
 
-export const createNavDefaults = Async(async function (req, res, next) {});
+export const createNavDefaults = Async(async function (req, res, next) {
+  const nav = [
+    {
+      category: "men",
+      blocks: [],
+    },
+    {
+      category: "women",
+      blocks: [],
+    },
+    {
+      category: "adult",
+      blocks: [],
+    },
+    {
+      category: "family",
+      blocks: [],
+    },
+  ];
+
+  await Nav.insertMany(nav);
+
+  res.status(201).json("nav is created");
+});

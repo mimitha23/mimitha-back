@@ -4,10 +4,12 @@
   "description": "Mimitha RestAPI",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"npm:watch\" \"npm:build\"",
+    "start": "node ./build/src/server.js",
+    "start:dev": "concurrently \"npm:watch\" \"npm:build:dev\"",
     "watch": "nodemon --exec ts-node --files ./src/server.ts",
     "compile": "tsc",
-    "build": "npm run compile"
+    "build": "npm run compile && npm run start",
+    "build:dev": "npm run compile"
   },
   "keywords": [],
   "author": "mimitha",
