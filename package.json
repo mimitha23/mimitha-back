@@ -4,7 +4,7 @@
   "description": "Mimitha RestAPI",
   "main": "index.js",
   "scripts": {
-    "start": "node ./build/src/server.js",
+    "start": "node ./build/server.js",
     "start:dev": "concurrently \"npm:watch\" \"npm:build:dev\"",
     "watch": "nodemon --exec ts-node --files ./src/server.ts",
     "compile": "tsc",
