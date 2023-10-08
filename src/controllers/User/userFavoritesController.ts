@@ -29,7 +29,7 @@ export const getAllFavorites = Async(async function (req, res, next) {
 
   let querySelect = "";
   if (select === "short") querySelect = "_id";
-  else querySelect = "product title price assets soldOut size color";
+  else querySelect = "product title price thumbnails soldOut size color";
 
   const docs = await User.findById(currUser._id)
     .select("favorites")

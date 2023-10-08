@@ -63,7 +63,7 @@ export const getAllFromList = Async(async function (req, res, next) {
     _id: listId,
   }).populate({
     path: "products",
-    select: "product title price assets soldOut size color",
+    select: "product title price thumbnails soldOut size color",
     populate: { path: "product", select: "category productType isEditable" },
   });
 
